@@ -1,4 +1,3 @@
-
 #include "Game.h"
 
 void setConfig(Config::Config c){
@@ -17,18 +16,18 @@ void setConstant(Constant::Constant constant){
     this.constant = constant;
 }
         
-Config::Config config(){
+Config::Config getConfig(){
     return this.config;
 }
-Rules::Rules rules(){
+Rules::Rules getRules(){
     return this.rules;
 }
-PerPlayer::PerPlayer perPlayer(){
+PerPlayer::PerPlayer getPerPlayer(){
     return this.perPlayer;
 }
-PerAudience::PerAudience perAudience(){
+PerAudience::PerAudience getPerAudience(){
     return this.perAudience;
 }
-Constant::Constant constant(){
+Constant::Constant getConstant(){
     return this.constant;
 }
