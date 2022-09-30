@@ -24,7 +24,6 @@ std::string Rules::ruleSetOperation(RulesType ruleT, std::string rule, T info, U
     }
 }
 //A couple of rule setters
-
 //Check if parallel or foreach, then operates accordingly
 void Rules::setRuleOnList(RulesType ruleT, std::string rule) {
     if (rule == "foreach") {
