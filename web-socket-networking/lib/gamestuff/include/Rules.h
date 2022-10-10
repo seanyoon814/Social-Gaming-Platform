@@ -4,4 +4,4 @@
 class Rules{
     public:
         virtual void runRule() = 0;
-}
+};
