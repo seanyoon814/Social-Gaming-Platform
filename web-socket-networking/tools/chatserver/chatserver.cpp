@@ -12,9 +12,10 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <cstring>
 #include <unistd.h>
 #include <vector>
-
+#include <map>
 
 using networking::Server;
 using networking::Connection;
@@ -22,7 +23,8 @@ using networking::Message;
 
 
 std::vector<Connection> clients;
-
+std::vector<std::vector<Connection>> rooms;
+std::map<uintptr_t,int> roomMap;
 
 void
 onConnect(Connection c) {
@@ -43,18 +45,31 @@ struct MessageResult {
   std::string result;
   bool shouldShutdown;
 };
-
+bool is_number(const std::string& s)
+{
+    return !s.empty() && std::find_if(s.begin(), 
+        s.end(), [](unsigned char c) { return !std::isdigit(c); }) == s.end();
+}
 
 MessageResult
 processMessages(Server& server, const std::deque<Message>& incoming) {
   std::ostringstream result;
   bool quit = false;
   for (auto& message : incoming) {
+    std::string msge = message.text;
     if (message.text == "quit") {
       server.disconnect(message.connection);
     } else if (message.text == "shutdown") {
       std::cout << "Shutting down.\n";
       quit = true;
+      
+    } else if (message.text == "create") {
+      int number = rand() % 9000 + 1000;
+      std::cout << "Creating room " << number << ".\n";
+      roomMap.insert(std::pair<uintptr_t,int>(message.connection.id, stoi(number)))
+    } else if (is_number(msge)) {
+      std::cout << "Joining Room: " << message.text<<"\n";
+      roomMap.insert(std::pair<uintptr_t,int>(message.connection.id, stoi(message.text)));
     } else {
       result << message.connection.id << "> " << message.text << "\n";
     }
