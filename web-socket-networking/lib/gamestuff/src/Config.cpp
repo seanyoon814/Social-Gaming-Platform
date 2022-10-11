@@ -3,7 +3,7 @@ namespace std{
 
 Config::Config(map<string, string> json_values)
 {
-    setJSON();
+    setJSON(json_values);
 }
 Config::~Config()
 {
@@ -33,8 +33,12 @@ GameSetup Config::getSetup()
 {
     return setup;
 }
+void Config::setSetup(bool n)
+{
+    hasSetup = n;
+}
 //these two must run 
-bool Config::assertJSON()
+bool Config::assertJSON() const
 {
     map<string, string> json_values = getJSON();
     for (auto const& val : json_values)
@@ -45,32 +49,21 @@ bool Config::assertJSON()
             return false;
         }
     }
-    assert(atoi(json_values['min']) != 0);
-    assert(atoi(json_values['min']) >= 0);
-    assert(atoi(json_values['max']) != 0);
-    assert(atoi(json_values['min']) <= atoi(json_values['max']));
-    assert(json_values['audience'] == 'false' || json_values['audience'] == 'true');
+    assert(stoi(json_values["min"]) != 0);
+    assert(stoi(json_values["min"]) >= 0);
+    assert(stoi(json_values["max"]) != 0);
+    assert(stoi(json_values["min"]) <= stoi(json_values["max"]));
+    assert(json_values["audience"] == "false" || json_values["audience"] == "true");
     //since setup does not need to have any attributes
-    try
-    {
-        assert(atoi(json_values['setup']['Rounds']) !=0);
-        hasSetup = true;
-        return true;
-    }
-    catch()
-    {
-        hasSetup = false;
-        return true;
-    }
 }
 
 void Config::setVariables()
 {
     map<string, string> json_values = getJSON();
-    changeName(json_values['name']);
-    changeMin(json_values['min']);
-    changeMax(json_values['max']);
-    if(json_values['audience'] == 'true')
+    changeName(json_values["name"]);
+    changeMin(stoi(json_values["min"]));
+    changeMax(stoi(json_values["max"]));
+    if(json_values["audience"] == "true")
     {
         changeAudience(true);
     }
@@ -80,7 +73,7 @@ void Config::setVariables()
     }
     if(hasSetup == true)
     {
-        setup.rounds = json_values['Rounds'];
+        setup.rounds = stoi(json_values["Rounds"]);
     }
 }
 }

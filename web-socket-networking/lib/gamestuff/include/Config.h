@@ -29,18 +29,20 @@ namespace std{
         void changeName(string newName) noexcept;
         void changeAudience(bool newAudience) noexcept;
         void setJSON(map<string, string> json_values);
-        map<string, string> getJSON();
+        map<string, string> getJSON() const;
         //return game setup struct
-        GameSetup getSetup() const noexcept;
+        GameSetup getSetup()noexcept;
         //Assert the things in the json
-        bool assertJSON(map<string, string> json_values) const;
+        bool assertJSON() const;
         //set values from JSON file into Config class
-        void setVariables(map<string, string> json_values);
+        void setVariables();
+        //set setup bool variable
+        void setSetup(bool n);
     private:
         //Name of the game
         map<string, string> json;
         //
-        const vector<string> attributes = {'name', 'player count', 'audience', 'setup', 'min', 'max', 'audience', 'setup'};
+        vector<string> attributes = {"name", "player count", "audience", "setup", "min", "max", "audience", "setup"};
 
         string name;
         //Minimum number of players
@@ -52,8 +54,7 @@ namespace std{
         //Setup struct that contains rounds, quiz questions + answers, etc.
         //Will need to adjust this struct later according to type of game in a later iteration
         GameSetup setup;
+        
         bool hasSetup;
 };
 }
-
-#endif
