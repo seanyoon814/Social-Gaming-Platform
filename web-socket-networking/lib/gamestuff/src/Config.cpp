@@ -54,12 +54,13 @@ bool Config::assertJSON() const
     assert(stoi(json_values["max"]) != 0);
     assert(stoi(json_values["min"]) <= stoi(json_values["max"]));
     assert(json_values["audience"] == "false" || json_values["audience"] == "true");
+    return true;
     //since setup does not need to have any attributes
 }
 
 void Config::setVariables()
 {
-    map<string, string> json_values = getJSON();
+    map<string, string> json_values = getJSON(); 
     changeName(json_values["name"]);
     changeMin(stoi(json_values["min"]));
     changeMax(stoi(json_values["max"]));
