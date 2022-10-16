@@ -7,7 +7,7 @@ Loop::Loop(bool &c,std::vector<Rules> r)
     rules =r;
 }
 
-void runRule(){
+void Loop::runRule(){
     while(c){
         //std::cout << "test";
         for(auto rule: rules)
