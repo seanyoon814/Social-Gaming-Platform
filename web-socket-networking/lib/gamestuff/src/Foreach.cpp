@@ -1,4 +1,5 @@
 #include "Foreach.h"
+#include <algorithm>
 
 Foreach::Foreach(std::vector<Rules *> ruleList)
 {
@@ -20,15 +21,13 @@ void Foreach::runRule()
     /*
     for(auto item:items)
     {
-        for(auto const& rule: rules)
-        {
+        std::for_each(rules.begin(), rules.end(), [](auto rule) {
             rule->runRule();
-        }
+        });
     }
     */
-    for(auto const& rule: rules)
-    {
+    std::for_each(rules.begin(), rules.end(), [](auto rule) {
         rule->runRule();
-    }
+    });
 }
 
