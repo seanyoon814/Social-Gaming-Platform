@@ -12,6 +12,7 @@ struct Condition
 class Loop: public virtual Rules{
     public:
         Loop(bool &c, std::vector<Rules> r);
+        ~Loop();
         void runRule();
         std::vector<Rules> getRules();
     

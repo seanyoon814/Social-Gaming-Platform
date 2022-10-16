@@ -6,6 +6,9 @@ Input_choice::Input_choice(int p, std::string s, std::vector<std::string> c, int
     choices = c;
     timeout =t;
 }
+
+~Input::Input_choice(){}
+
 void Input_choice::runRule(){
             //Currently displays the message in stdout, 
             //need to update later once server/client is implemented to send message to correct user

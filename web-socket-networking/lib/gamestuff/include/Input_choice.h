@@ -7,6 +7,7 @@
 class Input_choice: public virtual Rules{
     public:
         Input_choice(int p, std::string s, std::vector<std::string> c, int t=0);
+        ~Input_choice();
         void runRule();
         
     private:

@@ -6,7 +6,7 @@ Loop::Loop(bool &c,std::vector<Rules> r)
     cond = c;
     rules =r;
 }
-
+~Loop:Loop(){}
 void Loop::runRule(){
     while(c){
         //std::cout << "test";
