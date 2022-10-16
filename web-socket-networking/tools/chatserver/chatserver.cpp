@@ -17,6 +17,7 @@
 #include <vector>
 #include <map>
 
+
 using networking::Server;
 using networking::Connection;
 using networking::Message;
@@ -66,7 +67,7 @@ processMessages(Server& server, const std::deque<Message>& incoming) {
     } else if (message.text == "create") {
       int number = rand() % 9000 + 1000;
       std::cout << "Creating room " << number << ".\n";
-      roomMap.insert(std::pair<uintptr_t,int>(message.connection.id, stoi(number)))
+      roomMap.insert(std::pair<uintptr_t,int>(message.connection.id, number));
     } else if (is_number(msge)) {
       std::cout << "Joining Room: " << message.text<<"\n";
       roomMap.insert(std::pair<uintptr_t,int>(message.connection.id, stoi(message.text)));
@@ -81,6 +82,17 @@ processMessages(Server& server, const std::deque<Message>& incoming) {
 std::deque<Message>
 buildOutgoing(const std::string& log) {
   std::deque<Message> outgoing;
+  std::vector<uintptr_t> roomClients;
+  std::stringstream clientID;
+  clientID << log.substr(0,14);
+  //int roomID = roomMap[clientID.str()];
+  int roomID = 0;
+  //boost::push_back(roomClients, roomMap | map_values | filtered([roomID](int val){ return val == roomID; }));
+  for (auto rooms : roomMap ) {
+    if(rooms.second == roomID) {
+      roomClients.push_back(rooms.first);
+    }
+  }
   for (auto client : clients) {
     outgoing.push_back({client, log});
   }
