@@ -2,87 +2,147 @@
 // Created by Sarah on 2022-10-10.
 //
 
+//
+// Created by Sarah on 2022-10-10.
+//
+
 #include <iostream>
 #include <memory>
 #include <vector>
 #include <string>
 
+using std::string;
+using std::vector;
+using std::ostream;
+using std::shared_ptr;
+
+
+
 class Data{
+public:
+    explicit Data(const std::string& name);
+    std::string getName() const;
+    virtual ostream& output(ostream& out) const;
+    friend std::ostream& operator<<(std::ostream& out, Data const& data);
+private:
     std::string name;
-    data(const std::string& name);
-    virtual ~data();
 };
 
-class TestObj : public Data{
-    TestObj(const std::string& name, const std::string& value);
+class StringObj : public Data{
+public:
+    StringObj(const std::string& name, const std::string&  value);
+    string getValue() const;
+    ostream& output(ostream& out) const override;
+//     bool comparator()
 private:
     std::string value;
 };
+
+class IntObj : public Data{
+public:
+    IntObj(const std::string& name, const int&  value);
+
+private:
+    int value;
+};
+
 
 class Rules{
 public:
     virtual void runRule() = 0;
 };
 
-using dataVectorSharedPtr = std::shared_ptr<vector<std::shared_ptr<Data>>>;
-template <type T> using TVectorSharedPtr = std::shared_ptr<std::vector<T>>;
 
-template <type T>
+using dataVector = std::vector<std::shared_ptr<Data>>;
+using vectorsData = vector<dataVector>;
+
 class ListExtend : virtual Rules {
 public:
-    ListExtend(dataVectorSharedPtr<T> target, const TVectorSharedPtr<T> list);
-    void runRule();
+    ListExtend(vectorsData& target, const dataVector& list);
+    void runRule() override;
 private:
-    dataVectorSharedPtr target;
-    TVectorSharedPtr<T> list;
+    dataVector list;
+    vectorsData* target = nullptr;
 };
 
-template <type T>
 class ListReverse : virtual Rules {
-    ListReverse(TVectorSharedPtr<T> list);
-    void runRule();
+public:
+    ListReverse(vectorsData& list);
+    ListReverse(dataVector& dataVector);
+
+    void runRule() override;
 private:
-    TVectorSharedPtr<T> list;
+    vectorsData* list = nullptr;
+    dataVector* datavctr = nullptr;
 };
 
-template <type T>
 class ListShuffle : virtual Rules {
-    ListShuffle(const TVectorSharedPtr<T> list);
+public:
+    ListShuffle(vectorsData& list);
+    ListShuffle(dataVector& datavctr);
     void runRule();
 private:
-    TVectorSharedPtr<T> list;
+    vectorsData* list = nullptr;
+    dataVector* datavctr = nullptr;
 };
 
-template <type T>
+
+template <typename T>
 class ListSort : virtual Rules {
-    ListSort(TVectorSharedPtr<T> list);
-    ListSort(TVectorSharedPtr<T> list, T key);
+public:
+    ListSort(vectorsData& list);
+    ListSort(dataVector & datavctr);
+//    ListSort(vectorsData& list, T key);
+//    ListSort(dataVector & datavctr, T key);
     void runRule();
 private:
-    TVectorSharedPtr<T> list;
+    vectorsData* list = nullptr;
+    dataVector* datavctr = nullptr;
+    bool hasKey = false;
     T key;
 };
 
-//TODO: for deal and discard, how do you access the variable list if the parameter from and to is a "variable name"
 
-template <type T>
-class ListDeal : virtual Rules {
-    ListDeal(const std::string& from, const std::string& to, const int& count, TVectorSharedPtr<T> list);
-    void runRule();
-private:
-    const string from;
-    const string to;
-    const int count;
-    TVectorSharedPtr<T> list;
-};
 
-template <type T>
-class ListDiscard : virtual Rules {
-    ListDiscard(const std::string& from, const int& count);
-    void runRule();
-private:
-    const string from;
-    const string to;
-    const int count;
-    TVectorSharedPtr<T> list;
-};
+
+
+////TODO: for deal and discard, how do you access the variable list if the parameter from and to is a "variable name"
+//
+//template <typename T>
+//class ListDeal : virtual Rules {
+//    ListDeal(const std::string& from, const std::string& to, const int& count, vectorsData list);
+//    void runRule();
+//private:
+//    const string from;
+//    const string to;
+//    const int count;
+//    vectorsData list;
+//};
+//
+//template <typename T>
+//class ListDiscard : virtual Rules {
+//    ListDiscard(const std::string& from, const int& count);
+//    void runRule();
+//private:
+//    const string from;
+//    const string to;
+//    const int count;
+//    vectorsData list;
+//};
+
+
+template <typename T>
+ostream& operator<<(ostream& out, const vector<shared_ptr<T>>& vectors){
+    for(const auto& vector : vectors){
+        out << *vector  << std::endl;
+    }
+    return out;
+}
+
+template <typename T>
+ostream& operator<<(ostream& out, const vector<vector<shared_ptr<T>>> & vectors){
+for(const auto& vector : vectors){
+out << vector << std::endl;
+}
+return out;
+}
