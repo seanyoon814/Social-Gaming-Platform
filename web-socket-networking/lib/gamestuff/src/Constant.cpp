@@ -2,19 +2,19 @@
 #include <string>
 #include "Constant.h"
 
-Constant::Constant(std::map<std::string, std::any> constant)
+Constant::Constant(std::map<std::string, Data> constant)
 {
     this->constant = constant;
 }
 
-std::any Constant::getConstant(std::string name)
+Data Constant::getConstant(std::string name)
 {
-    typename std::map<std::string, std::any>::iterator itr;
+    typename std::map<std::string, Data>::iterator itr;
     itr = constant.find(name);
     return itr->second;
 }
 
-void Constant::addConstant(std::string name, std::any value)
+void Constant::addConstant(std::string name, Data value)
 {
     constant.insert({name, value});
 }

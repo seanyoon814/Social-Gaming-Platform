@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <map>
-#include "Constant.h"
 #include <iostream>
+#include "Constant.h"
+#include "Data.h"
 
 // Tests different types of values inside the constant map.
 void differentTypesTest()

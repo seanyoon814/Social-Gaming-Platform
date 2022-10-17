@@ -1,20 +1,19 @@
 #include <map>
 #include <string>
-#include <any>
+#include "Data.h"
 
-// using type std::any to hold any type for the map
 class Constant
 {
 public:
     // constructor
-    Constant(std::map<std::string, std::any> constant);
+    Constant(std::map<std::string, Data> constant);
     // Get a specific constant values
-    std::any getConstant(std::string name);
+    Data getConstant(std::string name);
     // Add a constant
-    void addConstant(std::string name, std::any value);
+    void addConstant(std::string name, Data value);
     // Get size of constant map
     int getSize();
 
 private:
-    std::map<std::string, std::any> constant;
+    std::map<std::string, Data> constant;
 };
