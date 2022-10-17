@@ -1,4 +1,4 @@
-#include "config.h"
+#include "Config.h"
 
 Config::Config(std::string gameName, int minPlayers, int maxPlayers, bool hasAudience)
 {
