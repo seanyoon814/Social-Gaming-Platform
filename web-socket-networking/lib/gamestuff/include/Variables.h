@@ -1,21 +1,21 @@
-#include <any>
 #include <map>
 #include <string>
+#include "Data.h"
 
-class Variable
+class Variables
 {
 public:
     // Constructor
-    Variable(std::map<std::string, std::any> variables);
+    Variables(std::map<std::string, Data> variables);
     // Get a specific variable value
-    std::any getVariable(std::string name);
+    Data getVariable(std::string name);
     // Add a variable
-    void addVariable(std::string name, std::any value);
+    void addVariable(std::string name, Data value);
     // Remove a variable
     void removeVariable(std::string name);
     // Get size of variable map
     int getSize();
 
 private:
-    std::map<std::string, std::any> variables;
+    std::map<std::string, Data> variables;
 };

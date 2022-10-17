@@ -2,29 +2,29 @@
 #include <string>
 #include "Variables.h"
 
-Variable::Variable(std::map<std::string, std::any> variables)
+Variables::Variables(std::map<std::string, Data> variables)
 {
     this->variables = variables;
 }
 
-std::any Variable::getVariable(std::string name)
+Data Variables::getVariable(std::string name)
 {
-    typename std::map<std::string, std::any>::iterator itr;
+    typename std::map<std::string, Data>::iterator itr;
     itr = variables.find(name);
     return itr->second;
 }
 
-void Variable::addVariable(std::string name, std::any value)
+void Variables::addVariable(std::string name, Data value)
 {
     variables.insert({name, value});
 }
 
-void Variable::removeVariable(std::string name)
+void Variables::removeVariable(std::string name)
 {
     variables.erase(name);
 }
 
-int Variable::getSize()
+int Variables::getSize()
 {
     return variables.size();
 }
