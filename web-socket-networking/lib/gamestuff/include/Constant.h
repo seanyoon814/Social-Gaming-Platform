@@ -1,37 +1,20 @@
 #include <map>
 #include <string>
-using namespace std;
+#include <any>
 
-// For quiz based game
-struct Questions
-{
-    // map containing question and answers
-    map<string, string> questionsAnswers;
-    // number of questions
-    int length;
-};
-
+// using type std::any to hold any type for the map
 class Constant
 {
 public:
     // constructor
-    Constant(map<string, Questions> constant);
-    // destructor
-    ~Constant();
-    // Add questions/answers
-    void addQuestionAnswer(string question, string answer);
-    // Returns questions and answers
-    Questions getQuestions();
-    // Returns answer to question
-    string getAnswer(string question);
-    // Returns number of questions
-    int getNumOfQuestions();
+    Constant(std::map<std::string, std::any> constant);
+    // Get a specific constant values
+    std::any getConstant(std::string name);
+    // Add a constant
+    void addConstant(std::string name, std::any value);
+    // Get size of constant map
+    int getSize();
 
 private:
-    // For quiz based games, constant is Questions
-    // Which contains a map from questions to answers
-    map<string, Questions> constant;
-
-    // Questions struct contains questions
-    Questions questions;
+    std::map<std::string, std::any> constant;
 };

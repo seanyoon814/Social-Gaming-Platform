@@ -1,17 +1,20 @@
 #include "Rules.h"
-
+#include "Variables.h"
+#include "Data.h"
 class Add: public virtual Rules{
     public:
-        std::vector<Rules> getRules();
-        void add(std::string to, int value);
+        std::vector<Variables> getVariables();
+        void add(std::string name, int value);
     private:
-        std::vector<Rules> rules;
+        std::vector<Variables> variables;
 };
 
 class Numerical: public virtual Rules{
     public:
-        void upfrom(int n);
-        std::vector<Rules> getRules(); 
+        Numerical(int n);
+        std::vector<Variables> upfrom(int n);
+        std::vector<Variables> getRules(); 
     private:
-        std::vector<Rules> list;
+        int start;
+        std::vector<Variables> list;
 };

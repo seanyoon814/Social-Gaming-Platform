@@ -24,4 +24,4 @@ class Rules{
         void setTimerRule(RulesType ruleT,int duration, std::string mode )
         void setMessageRule(RulesType ruleT,std::string message);
         void setGlobalMessageRule(RulesType ruleT,std::string message);
-}
+};

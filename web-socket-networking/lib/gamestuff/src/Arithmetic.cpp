@@ -1,31 +1,44 @@
 #include "Arithmetic.h"
 
-std::vector<Rules> Add:getRules()
+std::vector<Variables> Add::getVariables()
 {
-    return rules;
+    return variables;
 }
 
-void Add::add(std::string to, int value)
+void Add::add(std::string name, int value)
 {
-    std::vector<Rules> r = getRules();
-    for(auto rule : r)
+    std::vector<Variables> v = getVariables();
+    for(auto rule : v)
     {
-        //TODO: how to get rule name and rule value? 
-
-        // if(rule.name == to)
-        // {
-        //     rule.value+=value;
-        // }
+        if(rule.getVariable(name) == name)
+        {
+            rule.addVariable(name, value);
+        }
     }
 }
-
-std::vector<Rules> Numerical::getRules()
+std::vector<Variables> Numerical::getRules()
 {
     return list;
 }
-
-void Numerical::upfrom(int n)
+Numerical::Numerical(int n)
 {
-
+    start = n;
 }
-
+std::vector<Variables> Numerical::upfrom(int n)
+{
+    std::vector<Variables> v;
+    if(n<= start)
+    {
+        return;
+    }
+    for(int i = n; i<start; i++)
+    {
+        std::map<std::string, Data> map;
+        Data d;
+        //Need to figure out how to set data to correct val? Constructor requires a data object but all attributes are inherited from Data.h?
+        map[std::to_string(i)] = d;
+        Variables v(map);
+        v.push_back(v);
+    }
+    return v;
+}
