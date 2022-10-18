@@ -1,21 +1,21 @@
 #include "Input_choice.h"
 
-Input_choice::Input_choice(int p, std::string s, std::vector<std::string> c, int t=0){
+Input_choice::Input_choice(int p, std::string s, std::vector<std::string> c, double t){
     playerID = p;
     prompt = s;
     choices = c;
     timeout =t;
 }
 
-~Input::Input_choice(){}
+Input_choice::~Input_choice(){}
 
 void Input_choice::runRule(){
             //Currently displays the message in stdout, 
             //need to update later once server/client is implemented to send message to correct user
-            std::cout << "Sending Message to player " << playerID << endl << prompt << endl;
+            std::cout << "Sending Message to player " << playerID << std::endl << prompt << std::endl;
             for(std::size_t i=0; i<choices.size(); i++){
                 std::printf("[%lu] ",i+1);
-                std::cout<< choices[i] << endl;
+                std::cout<< choices[i] << std::endl;
             }
             
             if(timeout==0){
@@ -35,14 +35,22 @@ void Input_choice::runRule(){
             }
             //Validate input choice
             if (result.empty()){
-                std::cout << "Timed out\n";
+                std::cerr << "Timed out\n";
                 return;
             }
             try{
                 if(std::stoi(result) < 1 || std::stoi(result)>choices.size()){
-                    std::cout<<"Invalid: choice out of range\n";
+                    std::cerr<<"Invalid: choice out of range\n";
                     return;
                 }
-            }catch(exception e){std::cout <<"Invalid input\n"; return;}
+            }catch(std::exception e){
+                result.clear(); 
+                std::cerr <<"Invalid input\n"; 
+                return;
+                }
            
         }
+
+std::string Input_choice::getResult(){
+    return result;
+}
