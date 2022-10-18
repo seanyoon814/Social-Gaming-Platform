@@ -117,3 +117,121 @@ TEST(assertListOps, shuffle){
     cout << "Shuffled vector:\n" << resultVector << std::endl;
 
 }
+
+// TEST(assertListOps, sort){
+//     dataVector exampleVector;
+//     exampleVector.push_back(make_shared<StringObj>("three","3"));
+//     exampleVector.push_back(make_shared<StringObj>("five","5"));
+//     exampleVector.push_back(make_shared<StringObj>("two","2"));
+//     exampleVector.push_back(make_shared<StringObj>("one","1"));
+//     exampleVector.push_back(make_shared<StringObj>("four","4"));
+
+//     cout <<"Original vector:\n" << exampleVector << std::endl;
+//     (ListSort(exampleVector));
+//     cout << "Sorted vector:\n" << exampleVector << std::endl;
+
+//     vectorsData resultVector = {
+//             dataVector{
+//                     make_shared<StringObj>("three","3"),
+//                     make_shared<StringObj>("four","4")
+//             },
+//             dataVector{
+//                     make_shared<StringObj>("one","1"),
+//                     make_shared<StringObj>("two","2")
+//             },
+//             dataVector{
+//                     make_shared<StringObj>("six","6"),
+//                     make_shared<StringObj>("nine","9")
+//             }
+//     };
+
+//     cout <<"Original vector:\n" << resultVector << std::endl;
+//     (ListSort(resultVector));
+//     cout << "Sorted vector:\n" << resultVector << std::endl;
+
+// }
+
+TEST(assertListOps, discard){
+    dataVector exampleVector;
+    std::cout << std::boolalpha;
+    exampleVector.push_back(make_shared<StringObj>("three","3"));
+    exampleVector.push_back(make_shared<StringObj>("five","5"));
+    exampleVector.push_back(make_shared<StringObj>("two","2"));
+    exampleVector.push_back(make_shared<StringObj>("one","1"));
+    exampleVector.push_back(make_shared<StringObj>("four","4"));
+
+    cout <<"Original vector:\n" << exampleVector << std::endl;
+    (ListDiscard(exampleVector,1));
+    cout << "Discard one from vector:\n" << exampleVector << std::endl;
+    (ListDiscard(exampleVector,exampleVector.size()));
+    cout << "Empty vector after discarding:\n Expected:\ttrue \n Actual:\t" 
+         << exampleVector.empty() <<"\n" << std::endl;
+    
+    cout << "Discarding lists of vectors:\n";
+    vectorsData resultVector = {
+            dataVector{
+                    make_shared<StringObj>("three","3"),
+                    make_shared<StringObj>("four","4")
+            },
+            dataVector{
+                    make_shared<StringObj>("one","1"),
+                    make_shared<StringObj>("two","2")
+            },
+            dataVector{
+                    make_shared<StringObj>("six","6"),
+                    make_shared<StringObj>("nine","9")
+            }
+    };
+
+    cout <<"Original vector:\n" << resultVector << std::endl;
+    (ListDiscard(resultVector, 1));
+    cout << "Discarded one from vector:\n" << resultVector << std::endl;
+    (ListDiscard(resultVector, resultVector.size()));    
+    cout << "Discarded all from vector:\n Expected:\ttrue \n Actual:\t" 
+         << resultVector.empty() <<"\n" << std::endl;
+    ASSERT_TRUE(true);
+}
+
+TEST(assertListOps, deal){
+    dataVector exampleVector;
+    dataVector toDealVector1;
+    dataVector toDealVector2;
+    std::cout << std::boolalpha;
+    exampleVector.push_back(make_shared<StringObj>("three","3"));
+    exampleVector.push_back(make_shared<StringObj>("five","5"));
+    exampleVector.push_back(make_shared<StringObj>("two","2"));
+    exampleVector.push_back(make_shared<StringObj>("one","1"));
+    exampleVector.push_back(make_shared<StringObj>("four","4"));
+
+    cout <<"Original vector:\n" << exampleVector << std::endl;
+    (ListDeal(exampleVector, toDealVector1, 1));
+    cout << "Deal one from example vector:\n" << exampleVector << std::endl;
+    (ListDeal(exampleVector, toDealVector2, exampleVector.size()));
+    cout << "Copy full exampleVector: \n"<< exampleVector << std::endl;
+    cout << "Copy full exampleVector:\n Expected:\ttrue \n Actual:\t" 
+         << (toDealVector2 == exampleVector) <<"\n" << std::endl;
+    
+    cout << "Discarding lists of vectors:\n";
+    vectorsData resultVector = {
+            dataVector{
+                    make_shared<StringObj>("three","3"),
+                    make_shared<StringObj>("four","4")
+            },
+            dataVector{
+                    make_shared<StringObj>("one","1"),
+                    make_shared<StringObj>("two","2")
+            },
+            dataVector{
+                    make_shared<StringObj>("six","6"),
+                    make_shared<StringObj>("nine","9")
+            }
+    };
+
+//     cout <<"Original vector:\n" << resultVector << std::endl;
+//     (ListDiscard(resultVector, 1));
+//     cout << "Discarded one from vector:\n" << resultVector << std::endl;
+//     (ListDiscard(resultVector, resultVector.size()));    
+//     cout << "Discarded all from vector:\n Expected:\ttrue \n Actual:\t" 
+//          << resultVector.empty() <<"\n" << std::endl;
+//     ASSERT_TRUE(true);
+}

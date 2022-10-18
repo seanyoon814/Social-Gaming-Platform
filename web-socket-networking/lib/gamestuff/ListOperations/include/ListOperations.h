@@ -54,7 +54,7 @@ public:
 
 
 using dataVector = std::vector<std::shared_ptr<Data>>;
-using vectorsData = vector<dataVector>;
+using vectorsData = std::vector<dataVector>;
 
 class ListExtend : virtual Rules {
 public:
@@ -87,26 +87,54 @@ private:
 };
 
 
-template <typename T>
+//template <typename T>
 class ListSort : virtual Rules {
 public:
     ListSort(vectorsData& list);
     ListSort(dataVector & datavctr);
-//    ListSort(vectorsData& list, T key);
-//    ListSort(dataVector & datavctr, T key);
+    // ListSort<T>(vectorsData& list, T key);
+    // ListSort<T>(dataVector & datavctr, T key);
     void runRule();
 private:
     vectorsData* list = nullptr;
     dataVector* datavctr = nullptr;
     bool hasKey = false;
-    T key;
+    //T key;
+};
+
+class ListDeal : virtual Rules {
+public:
+    ListDeal(vectorsData& list, vectorsData& to, int ct);
+    ListDeal(dataVector & datavctr, dataVector& to,int ct);
+    void runRule();
+private:
+    vectorsData* list = nullptr;
+    dataVector* datavctr = nullptr;
+    vectorsData* toList = nullptr;
+    dataVector* toDatavctr = nullptr;
+    int count;
+};
+
+class ListDiscard : virtual Rules {
+public:
+    ListDiscard(vectorsData& list,int ct);
+    ListDiscard(dataVector& datavctr, int ct);
+    void runRule();
+private:
+    vectorsData* list = nullptr;
+    dataVector* datavctr = nullptr;
+    int count;
 };
 
 
 
 
 
+
 ////TODO: for deal and discard, how do you access the variable list if the parameter from and to is a "variable name"
+//
+// from and to are both lists, so when the discard keyword is called we know that from and to will be lists. 
+// In the JSON file rules handler, we will call functions according to their respective names
 //
 //template <typename T>
 //class ListDeal : virtual Rules {
