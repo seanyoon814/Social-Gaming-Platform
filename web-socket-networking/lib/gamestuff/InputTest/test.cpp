@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "Input_choice.h"
+#include "Input.h"
 
 using namespace testing;
 
@@ -68,6 +68,14 @@ namespace {
         std::string expected{"Timed out\n"};
         std::string actual{buffer.str()};
         EXPECT_EQ(expected, actual);
+    }
+
+    TEST_F(IO_TestFixture, InputTextTest){
+        std::istringstream ibuffer(" string_ 1 @. 1");
+        std::cin.rdbuf(ibuffer.rdbuf());
+        Input_text test = Input_text{5,"Prompt"};
+        test.runRule();
+        EXPECT_EQ(" string_ 1 @. 1",test.getResult());
     }
 }
 

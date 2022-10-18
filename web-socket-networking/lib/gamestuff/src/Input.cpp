@@ -1,17 +1,21 @@
-#include "Input_choice.h"
+#include "Input.h"
 
-Input_choice::Input_choice(int p, std::string s, std::vector<std::string> c, double t){
-    playerID = p;
+Input::Input(std::string s, double t){
     prompt = s;
-    choices = c;
     timeout =t;
+}
+
+//Input choice
+Input_choice::Input_choice(int p, std::string s, std::vector<std::string> c, double t):Input(s,t){
+    playerID = p;
+    choices = c;
 }
 
 Input_choice::~Input_choice(){}
 
 void Input_choice::runRule(){
-            //Currently displays the message in stdout, 
-            //need to update later once server/client is implemented to send message to correct user
+//Currently displays the message in stdout, 
+//need to update later once server/client is implemented to send message to correct user
             std::cout << "Sending Message to player " << playerID << std::endl << prompt << std::endl;
             for(std::size_t i=0; i<choices.size(); i++){
                 std::printf("[%lu] ",i+1);
@@ -53,4 +57,48 @@ void Input_choice::runRule(){
 
 std::string Input_choice::getResult(){
     return result;
+}
+
+//Input text
+Input_text::Input_text(int p, std::string s, double t):Input(s,t){
+    playerID = p;
+}
+
+Input_text::~Input_text(){}
+
+void Input_text::runRule(){
+            std::cout << "Sending Message to player " << playerID << std::endl << prompt << std::endl;
+
+            if(timeout==0){
+                std::getline(std::cin, result);
+            }else{            
+                time_t start = time(NULL);
+                time_t waitTime = timeout;            
+                while (time(NULL) < start + waitTime && result.empty())
+                {
+                    std::thread t1([&]() {std::getline(std::cin, result);});
+                    std::this_thread::sleep_for(std::chrono::milliseconds(20));
+                    t1.detach();
+                }
+            }
+            //Check input
+            if (result.empty()){
+                std::cerr << "Timed out\n";
+                return;
+            }           
+}
+std::string Input_text::getResult(){
+    return result;
+}
+
+//Input vote
+Input_vote::Input_vote(std::vector<int> ps, std::string s, std::vector<std::string> c,double t):Input(s,t){
+    playerList = ps;
+    choices = c;
+}
+
+Input_vote::~Input_vote(){}
+
+void Input_vote::runRule(){
+    //work in progress
 }

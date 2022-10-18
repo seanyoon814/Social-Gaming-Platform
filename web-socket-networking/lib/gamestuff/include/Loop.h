@@ -1,5 +1,6 @@
+#pragma once
 #include "Rules.h"
-
+#include <vector>
 /*Place holder condition template*/
 template <class T>
 struct Condition
