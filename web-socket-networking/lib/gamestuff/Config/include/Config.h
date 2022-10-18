@@ -32,7 +32,7 @@ namespace std{
         void changeName(string newName) noexcept;
         void changeAudience(bool newAudience) noexcept;
         void setJSON(map<string, Json::Value> json_values);
-        map<string, string> getJSON() const;
+        map<string, Json::Value> getJSON() const;
         //return game setup struct
         GameSetup getSetup()noexcept;
         //Assert the things in the json
