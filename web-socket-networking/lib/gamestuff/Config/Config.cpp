@@ -1,37 +1,39 @@
-#include "include/Config.h"
+// #include "include/Config.h"
+#include "Config.h"
 namespace std{
 
-Config::Config(map<string, Json::Value> json_values)
+Config::Config(Json::Value json)
 {
-    setJSON(json_values);
+    setJSON(json);
 }
-Config::~Config()
+void Config::setJSON(Json::Value j)
 {
-    delete this;
+    val = j;
 }
-void Config::createGameSetup(GameSetup gameSetup, int numRounds)
+void Config::setGameSetup()
 {
-    setup.rounds = numRounds;
+    json["setup"]["Rounds"] = val["setup"]["Rounds"];
+    setup.rounds = json["setup"]["Rounds"].asInt();
 }
-void Config::setJSON(map<string, Json::Value> json_values)
+void Config::setMin() noexcept
 {
-    json = json_values;
+    json["player count"]["min"] = val["player count"]["min"];
+    min = val["player count"]["min"].asInt();
 }
-void Config::changeMin(int newMin) noexcept
+void Config::setMax() noexcept
 {
-    min = newMin;
+    json["player count"]["max"] = val["player count"]["max"];
+    max = json["player count"]["max"].asInt();
 }
-void Config::changeMax(int newMax) noexcept
+void Config::setName() noexcept
 {
-    max = newMax;
+    json["name"] = val["name"];
+    name = json["name"].asString();
 }
-void Config::changeName(string newName) noexcept
+void Config::setAudience() noexcept
 {
-    name = newName;
-}
-void Config::changeAudience(bool newAudience) noexcept
-{
-    audience = newAudience;
+    json["audience"] = val["audience"];
+    audience = json["audience"].asBool();
 }
 GameSetup Config::getSetup() noexcept
 {
@@ -45,37 +47,41 @@ map<string, Json::Value> Config::getJSON() const
 {
     return json;
 }
-//these two must run 
-bool Config::assertJSON() const
+string Config::getName()
 {
-    map<string, Json::Value> json_values = getJSON();
-    // for (auto const& val : json_values)
-    // {
-    //     //if the key exists in JSON file
-    //     if(count(attributes.begin(), attributes.end(), val.first) == 0)
-    //     {
-    //         return false;
-    //     }
-    // }
-    assert(json_values["name"].asString() != "");
-    assert(json_values["player count"]["min"].asInt() >= 0);
-    assert(json_values["player count"]["max"].asInt() >= 0);
-    assert(json_values["player count"]["min"].asInt() <= json_values["player count"]["max"].asInt());
-    assert(json_values["audience"].asBool() == false || json_values["audience"].asBool() == true);
-    return true;
+    return name;
+}
+//these two must run 
+bool Config::assertJSON()
+{
+    //checking if the keys actually exist in the JSON config
+    for (auto const& val : json)
+    {
+        //if the key exists in JSON file
+        if(count(attributes.begin(), attributes.end(), val.first) == 0)
+        {
+            return false;
+        }
+    }
+    if(json["name"].asString() != "" 
+    && json["player count"]["max"].asInt() >= 0
+    && json["player count"]["min"].asInt() >= 0
+    && json["player count"]["min"].asInt() <= json["player count"]["max"].asInt()
+    && (json["audience"].asBool() == true 
+    || json["audience"].asBool() == false))
+    {
+        return true;
+    }
+    return false;
     //since setup does not need to have any attributes
 }
 
 void Config::setVariables()
 {
-    map<string, Json::Value> json_values = getJSON(); 
-    changeName(json_values["name"].asString());
-    changeMin(json_values["player count"]["min"].asInt());
-    changeMax(json_values["player count"]["max"].asInt());
-    changeAudience(json_values["audience"].asBool());
-    // if(hasSetup == true)
-    // {
-    //     setup.rounds = stoi(json_values["Rounds"]);
-    // }
+    setMin();
+    setMax();
+    setName();
+    setAudience();
+    setGameSetup();
 }
 }
