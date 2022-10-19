@@ -7,7 +7,7 @@ class PerPlayer {
 public:
     PerPlayer(map<int, string>, pair<int, string>);
 
-    ~PerPlayer();
+    //~PerPlayer();
 
     void removePlayer();
 
@@ -15,11 +15,18 @@ public:
 
     string getPlayerName();
 
-    int getScore();
+    void setCurrentScore(int currentScore);
+
+    int getCurrentScore();
+
+    void setHighScore(int highScore);
+
+    int getHighscore();
 
 private:
-    int ID;
+    int ID = 0;
     string name;
-    int score;
+    int score = 0;
+    int highscore = 0;
     map<int, string> players;
 };

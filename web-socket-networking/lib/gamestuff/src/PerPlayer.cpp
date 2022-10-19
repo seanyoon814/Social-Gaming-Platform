@@ -10,12 +10,14 @@ PerPlayer::PerPlayer(map<int, string> players, pair<int, string> player) {
     players.insert(player);
 }
 
+/*
 PerPlayer::~PerPlayer() {
     delete this;
 }
+*/
 
 void PerPlayer::removePlayer() {
-    this->players.erase(players.find(ID));
+    players.erase(players.find(ID));
 }
 
 int PerPlayer::getPlayerID() {
@@ -26,6 +28,18 @@ string PerPlayer::getPlayerName() {
     return name;
 }
 
-int PerPlayer::getScore() {
+void PerPlayer::setCurrentScore(int currentScore) {
+    score = currentScore;
+}
+
+int PerPlayer::getCurrentScore() {
     return score;
+}
+
+void PerPlayer::setHighScore(int highScore) {
+    highscore = highScore;
+}
+
+int PerPlayer::getHighscore() {
+    return highscore;
 }
