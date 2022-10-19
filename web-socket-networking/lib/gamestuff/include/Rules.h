@@ -1,18 +1,6 @@
 #include<vector>
 #include<string>
-//General rule struct to store various different rule elements 
-//(will need to change this to each ruletype)
-struct RuleType{
-    std::string rulesType;
-    //Some rule types use list
-    std::vector<std::string> list;
-    //Some rules use value
-    auto value;
-    //Many rule execute the rules list on list elements 
-    //Not certain how to operate with This
-    std::vector<std::string> rulesList;
-}
-template <typename T>
+
 class Rules{
     public:
         Rules(void) {};
