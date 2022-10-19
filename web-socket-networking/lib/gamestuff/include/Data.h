@@ -7,8 +7,8 @@
 class Data
 {
 public:
-    // virtual std::ostream &output(std::ostream &out) const;
-    // friend std::ostream &operator<<(std::ostream &out, Data const &data);
+    virtual std::ostream &output(std::ostream &out) const;
+    friend std::ostream &operator<<(std::ostream &out, Data const &data);
 };
 
 // String
@@ -17,7 +17,7 @@ class StringObj : public Data
 public:
     StringObj(const std::string &value);
     std::string getValue() const;
-    // std::ostream &output(std::ostream &out) const override;
+    std::ostream &output(std::ostream &out) const override;
     //     bool comparator()
 private:
     std::string value;
