@@ -10,14 +10,20 @@
 
 #define defaultRounds 10;
 
-namespace std{
+struct GameSetup{
+    //number of rounds
+    int rounds = defaultRounds;
 
-    struct GameSetup{
-        //number of rounds
-        int rounds = defaultRounds;
-    };
+    //FOR QUIZ GAME
 
-    class Config{
+    //Assume that every input for question will result in an input for answers
+    //Also assume questions and answers will share the same index, i.e., question 1 will be 
+    //located at questions[0], and the correpsonding answer will be at answers[0]
+    std::vector<std::string> questions;
+    std::vector<std::string> answers;
+};
+
+class Config{
     public:
         //Config constructor
         Config(Json::Value json);
