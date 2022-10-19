@@ -3,6 +3,7 @@
 
 class Rules{
     public:
+        virtual void runRule() = 0;
         Rules(void) {};
         ~Rules(void) {};
 

@@ -12,24 +12,24 @@ int main() {
 
     reader.parse(file, actualJson);
 
-    //std::cout<< "Total json data: \n" << actualJson <<std::endl;
-    /*std::cout<< "Configuration: " << actualJson["configuration"] <<std::endl;
+    std::cout<< "Total json data: \n" << actualJson <<std::endl;
+    std::cout<< "Configuration: " << actualJson["configuration"] <<std::endl;
     std::cout<< "Contants: " << actualJson["constants"] <<std::endl;
     std::cout<< "Variables: " << actualJson["variables"] <<std::endl;
     std::cout<< "Per-Player: " << actualJson["per-player"] <<std::endl;
     std::cout<< "Per-Audience: " << actualJson["per-audience"] <<std::endl;
     std::cout<< "Per-Audience: " << actualJson["per-audience"] <<std::endl;
-    std::cout<< "Rules: " << actualJson["rules"] <<std::endl;*/
+    std::cout<< "Rules: " << actualJson["rules"] <<std::endl;
 
     auto config = actualJson["configuration"];
-    /*std::cout<< "Audience: " << config["audience"] <<std::endl; 
+    std::cout<< "Audience: " << config["audience"] <<std::endl; 
     std::cout<< "Name: " << config["name"] <<std::endl;
     std::cout<< "Player Count: " << config["player count"] <<std::endl;
-    std::cout<< "setup: " << config["setup"] <<std::endl;*/
+    std::cout<< "setup: " << config["setup"] <<std::endl;
 
     bool audience = config["audience"].asBool();
 
-    //std::cout<<audience<<std::endl;
+    std::cout<<audience<<std::endl;
 
     //we can add to a map this way
 
@@ -63,9 +63,21 @@ int main() {
 
     config::config newConfigurations(audience, name, max_player, min_player, setup);
 
+    auto constants = actualJson["constants"];
 
+    auto variables = actualJson["variables"];
 
+    auto per_player = actualJson["per-player"];
 
+    auto per_audience = actualJson["per-audience"];
+
+    auto rules = actualJson["rules"];
+
+    Rules::Rules newRules(rules);
+
+    PerPlayer::PerPlayer newPlayerConfig(per_player);
+
+    PerAudience::PerAudience newAudienceConfig(per_audience);
 
     return 0;
 }
