@@ -12,8 +12,10 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <cstring>
 #include <unistd.h>
 #include <vector>
+#include <map>
 
 
 using networking::Server;
@@ -22,7 +24,8 @@ using networking::Message;
 
 
 std::vector<Connection> clients;
-
+std::vector<std::vector<Connection>> rooms;
+std::map<uintptr_t,int> roomMap;
 
 void
 onConnect(Connection c) {
@@ -43,18 +46,31 @@ struct MessageResult {
   std::string result;
   bool shouldShutdown;
 };
-
+bool is_number(const std::string& s)
+{
+    return !s.empty() && std::find_if(s.begin(), 
+        s.end(), [](unsigned char c) { return !std::isdigit(c); }) == s.end();
+}
 
 MessageResult
 processMessages(Server& server, const std::deque<Message>& incoming) {
   std::ostringstream result;
   bool quit = false;
   for (auto& message : incoming) {
+    std::string msge = message.text;
     if (message.text == "quit") {
       server.disconnect(message.connection);
     } else if (message.text == "shutdown") {
       std::cout << "Shutting down.\n";
       quit = true;
+      
+    } else if (message.text == "create") {
+      int number = rand() % 9000 + 1000;
+      std::cout << "Creating room " << number << ".\n";
+      roomMap.insert(std::pair<uintptr_t,int>(message.connection.id, number));
+    } else if (is_number(msge)) {
+      std::cout << "Joining Room: " << message.text<<"\n";
+      roomMap.insert(std::pair<uintptr_t,int>(message.connection.id, stoi(message.text)));
     } else {
       result << message.connection.id << "> " << message.text << "\n";
     }
@@ -66,6 +82,17 @@ processMessages(Server& server, const std::deque<Message>& incoming) {
 std::deque<Message>
 buildOutgoing(const std::string& log) {
   std::deque<Message> outgoing;
+  std::vector<uintptr_t> roomClients;
+  std::stringstream clientID;
+  clientID << log.substr(0,14);
+  //int roomID = roomMap[clientID.str()];
+  int roomID = 0;
+  //boost::push_back(roomClients, roomMap | map_values | filtered([roomID](int val){ return val == roomID; }));
+  for (auto rooms : roomMap ) {
+    if(rooms.second == roomID) {
+      roomClients.push_back(rooms.first);
+    }
+  }
   for (auto client : clients) {
     outgoing.push_back({client, log});
   }
