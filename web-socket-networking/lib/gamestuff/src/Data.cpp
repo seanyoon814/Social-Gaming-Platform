@@ -5,10 +5,10 @@
 #include "Data.h"
 
 // Data
-// std::ostream &operator<<(std::ostream &out, const Data &data)
-// {
-//     return data.output(out);
-// }
+std::ostream &operator<<(std::ostream &out, const Data &data)
+{
+    return data.output(out);
+}
 
 // String
 StringObj::StringObj(const std::string &value) : value(value) {}
@@ -18,10 +18,10 @@ std::string StringObj::getValue() const
     return value;
 }
 
-// std::ostream &StringObj::output(std::ostream &out) const
-// {
-//     return Data::output(out) << "\tValue: " << getValue() << "], ";
-// }
+std::ostream &StringObj::output(std::ostream &out) const
+{
+    return Data::output(out) << "\tValue: " << getValue() << "], ";
+}
 
 // Integer
 IntObj::IntObj(const int &value) : value(value) {}
