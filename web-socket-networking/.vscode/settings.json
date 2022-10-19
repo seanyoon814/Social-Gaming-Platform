@@ -1,52 +1,34 @@
 {
     "files.associations": {
-<<<<<<< HEAD
-        "array": "cpp",
-        "atomic": "cpp",
-        "bit": "cpp",
-        "*.tcc": "cpp",
-        "bitset": "cpp",
-        "cctype": "cpp",
-        "chrono": "cpp",
-        "clocale": "cpp",
-        "cmath": "cpp",
-        "condition_variable": "cpp",
-        "cstdarg": "cpp",
-        "cstddef": "cpp",
-        "cstdint": "cpp",
-=======
         "*.ejs": "html",
+        "unordered_map": "cpp",
+        "*.tcc": "cpp",
+        "string": "cpp",
         "cctype": "cpp",
         "clocale": "cpp",
         "cmath": "cpp",
         "csignal": "cpp",
         "cstdarg": "cpp",
         "cstddef": "cpp",
->>>>>>> origin/master
         "cstdio": "cpp",
         "cstdlib": "cpp",
         "cstring": "cpp",
         "ctime": "cpp",
         "cwchar": "cpp",
         "cwctype": "cpp",
-<<<<<<< HEAD
-=======
         "array": "cpp",
         "atomic": "cpp",
         "bit": "cpp",
-        "*.tcc": "cpp",
         "bitset": "cpp",
         "chrono": "cpp",
         "codecvt": "cpp",
         "complex": "cpp",
         "condition_variable": "cpp",
         "cstdint": "cpp",
->>>>>>> origin/master
         "deque": "cpp",
         "list": "cpp",
         "map": "cpp",
         "set": "cpp",
-        "unordered_map": "cpp",
         "vector": "cpp",
         "exception": "cpp",
         "algorithm": "cpp",
@@ -58,20 +40,15 @@
         "optional": "cpp",
         "random": "cpp",
         "ratio": "cpp",
-        "string": "cpp",
         "string_view": "cpp",
         "system_error": "cpp",
         "tuple": "cpp",
         "type_traits": "cpp",
         "utility": "cpp",
         "fstream": "cpp",
-<<<<<<< HEAD
-        "initializer_list": "cpp",
-=======
         "future": "cpp",
         "initializer_list": "cpp",
         "iomanip": "cpp",
->>>>>>> origin/master
         "iosfwd": "cpp",
         "iostream": "cpp",
         "istream": "cpp",
@@ -85,13 +62,10 @@
         "streambuf": "cpp",
         "thread": "cpp",
         "cinttypes": "cpp",
-<<<<<<< HEAD
-        "typeinfo": "cpp",
-        "any": "cpp"
-=======
         "typeindex": "cpp",
         "typeinfo": "cpp",
-        "variant": "cpp"
->>>>>>> origin/master
-    }
+        "variant": "cpp",
+        "cassert": "cpp"
+    },
+    "C_Cpp.errorSquiggles": "Disabled"
 }

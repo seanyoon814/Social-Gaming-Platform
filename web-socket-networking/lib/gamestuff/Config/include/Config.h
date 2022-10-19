@@ -1,5 +1,12 @@
-#include<vector>
-#include<string>
+#include <vector>
+#include <string>
+#include <map>
+#include <cassert>
+#include <algorithm>
+#include <stdlib.h>
+#include <iostream>
+#include <jsoncpp/json/value.h>
+#include <jsoncpp/json/json.h>
 
 #define defaultRounds 10;
 
@@ -19,22 +26,33 @@ struct GameSetup{
 class Config{
     public:
         //Config constructor
-        Config(std::string gameName, int minPlayers, int maxPlayers, bool hasAudience);
-        //Destructor
-        ~Config();
+        Config(Json::Value json);
         //Create the game setup. Not creating game setup will result in default rounds of 10.
-        void createGameSetup(GameSetup gameSetup, int numRounds, std::vector<std::string> q, std::vector<std::string> a);
+        void setGameSetup();
         //Change the min number of players
-        void changeMin(int newMin);
+        void setMin() noexcept;
         //Change the max number of players
-        void changeMax(int max);
-        //add a question and answer to the questions vector and answers vector in GameSetup setup variable.
-        void addQuestionAnswer(GameSetup &obj, std::string question, std::string answer);
+        void setMax() noexcept;
+        //change the name of the game
+        void setName() noexcept;
+        void setAudience() noexcept;
+        void setJSON(Json::Value j);
+        map<string, Json::Value> getJSON() const;
         //return game setup struct
-        GameSetup getSetup();
+        GameSetup getSetup()noexcept;
+        //Assert the things in the json
+        bool assertJSON();
+        //set values from JSON file into Config class
+        void setVariables();
+        //set setup bool variable
+        void setSetup(bool n);
+        int getMin();
+        map<string, Json::Value> json;
+        string getName();
     private:
         //Name of the game
-        std::string name;
+        vector<string> attributes = {"name", "player count", "audience", "setup", "min", "max", "audience"};
+        string name;
         //Minimum number of players
         int min;
         //Maximum number of players
@@ -44,4 +62,8 @@ class Config{
         //Setup struct that contains rounds, quiz questions + answers, etc.
         //Will need to adjust this struct later according to type of game in a later iteration
         GameSetup setup;
+        bool hasSetup;
+        //to get config
+        Json::Value val;
 };
+}
