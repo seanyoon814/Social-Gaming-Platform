@@ -79,4 +79,8 @@ public:
 
 private:
     std::list<Data> value;
+<<<<<<< HEAD
 };
+=======
+};
+>>>>>>> 8c8fbe5d15aa9e1b8f9915a30255f65857a3684e
