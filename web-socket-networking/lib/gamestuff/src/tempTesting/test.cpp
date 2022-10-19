@@ -6,11 +6,6 @@
 #include "../../include/when.h"
 
 
-class stubRule : public Rules
-{
-    public:
-        MOCK_METHOD(void, runRule, (), (override));
-};
 
 using namespace std;
 TEST(test,GlobalmessageTest)
@@ -25,22 +20,56 @@ TEST(test,GlobalmessageTest)
     EXPECT_EQ(actual, expected);
 }
 
-TEST(test,ForEachTest)
+TEST(test, whenTestTrue)
 {
     vector<Rules*> rules;
-    stubRule msg1;
-    stubRule msg2;
-    stubRule msg3;
+    bool cond = true;
+    rules.push_back(new Globalmessage("Test when"));
+    rules.push_back(new Globalmessage("Test when 2"));
+
+    pair<bool, vector<Rules*>> whenPair{cond,rules};
+    when whenRule{whenPair};
+    whenRule.runRule();
+    EXPECT_TRUE(true);
+}
+
+TEST(test, whenTestTrue)
+{
+    vector<Rules*> rules;
+    bool cond = false;
+    rules.push_back(new Globalmessage("Test when shouldn't run this"));
+    rules.push_back(new Globalmessage("Test when 2"));
+
+    pair<bool, vector<Rules*>> whenPair{cond,rules};
+    when whenRule{whenPair};
+    whenRule.runRule();
+    EXPECT_TRUE(true);
+}
+
+
+TEST(test,ForEachTest)
+{
     
-    rules.push_back(&msg2);
-    rules.push_back(&msg3);
+    vector<Rules*> nestedRules2;
+    Globalmessage* msg = new Globalmessage{"From when Rule being run"};
+    nestedRules2.push_back(msg);
+    vector<Rules*> nestedRules;
+    Globalmessage* msg2 = new Globalmessage{"From inner ForEach loop"};
+    nestedRules.push_back(msg2);
+    pair<bool,vector<Rules*>> whenPair{true, nestedRules2};
+    when* whentest = new when{whenPair};
+    nestedRules.push_back(whentest);
+    Globalmessage* msg3 = new Globalmessage{"From inner ForEach loop after when loop"};
+    nestedRules.push_back(msg3);
+    Foreach secondFor{nestedRules};
+    vector<Rules*> rules;
+    rules.push_back(&secondFor);
+    Globalmessage* msg4 = new Globalmessage("From parent ForEach after nested");
+    rules.push_back(msg4);
     Foreach firstFor{rules};
-    {
-        testing::InSequence seq;
-        EXPECT_CALL(msg1, runRule());
-        EXPECT_CALL(msg2, runRule());
-        EXPECT_CALL(msg3, runRule());
-    }
     
     firstFor.runRule();
+    
+    EXPECT_TRUE(true);
 }
+
