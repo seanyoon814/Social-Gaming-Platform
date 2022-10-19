@@ -1,40 +1,25 @@
 #include <map>
 #include <string>
-using namespace std;
-
 #include "Constant.h"
 
-Constant::Constant(map<string, Questions> constant)
+Constant::Constant(std::map<std::string, std::any> constant)
 {
     this->constant = constant;
-    // getting the first value which is the Questions struct
-    questions = constant.begin()->second;
-    questions.length = questions.questionsAnswers.size();
 }
 
-Constant::~Constant()
+std::any Constant::getConstant(std::string name)
 {
-    delete this;
-}
-
-void Constant::addQuestionAnswer(string question, string answer)
-{
-    questions.questionsAnswers.insert({question, answer});
-    questions.length++;
-}
-
-Questions Constant::getQuestions()
-{
-    return questions;
-}
-
-string Constant::getAnswer(string question){
-    map <string,string>::iterator itr;
-    itr = questions.questionsAnswers.find(question);
+    typename std::map<std::string, std::any>::iterator itr;
+    itr = constant.find(name);
     return itr->second;
 }
 
-int Constant::getNumOfQuestions()
+void Constant::addConstant(std::string name, std::any value)
 {
-    return questions.length;
+    constant.insert({name, value});
+}
+
+int Constant::getSize()
+{
+    return constant.size();
 }
