@@ -1,6 +1,6 @@
 #include "Rules.h"
 #include "Variables.h"
-#include "Data.h"
+#include "../Data/include/Data.h"
 class Add: public virtual Rules{
     public:
         std::vector<Variables> getVariables();
