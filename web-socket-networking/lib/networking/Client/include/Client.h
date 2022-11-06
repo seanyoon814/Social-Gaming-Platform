@@ -16,8 +16,6 @@ class Client{
 
     private:
         std::string name;
-        int wins = 0;
-        int losses = 0;
         int clientSocket;
         struct sockaddr_in addr;
         int sockfd;
