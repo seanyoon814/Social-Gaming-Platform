@@ -1,7 +1,7 @@
 #include "Parallelfor.h"
 #include <list>
 
-Parallelfor::Parallelfor(std::vector<Rules> ruleList, std::list list) {
+Parallelfor::Parallelfor(std::vector<Rules> ruleList, std::list<int> list) {
     rules = rules;
     list = list;
 }
@@ -10,7 +10,7 @@ std::vector<Rules> Parallelfor::getRules() {
     return rules;
 }
 
-std::list Parallelfor::getList() {
+std::list<int> Parallelfor::getList() {
     return list;
 }
 
