@@ -1,5 +1,7 @@
-
+project(DataLib)
+cmake_minimum_required(VERSION 3.10)
 add_library(Data)
+
 target_sources(Data
         PRIVATE
         Data.cpp
@@ -7,7 +9,9 @@ target_sources(Data
         )
 target_include_directories(Data
         PUBLIC
-        ${include})
+        include
+)
+
 
 set_target_properties(Data PROPERTIES
         LINKER_LANGUAGE CXX
