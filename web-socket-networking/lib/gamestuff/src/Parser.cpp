@@ -1,84 +1,475 @@
 #include <iostream>
-#include <jsoncpp/json/value.h>
-#include <jsoncpp/json/json.h>
 #include <fstream>
 #include <string>
 #include <map>
+#include <glog/logging.h>
+#include "JsonParser.h"
+#include "nlohmann/json.hpp"
 
-int main() {
-    std::ifstream file("data/config2.json");
-    Json::Value actualJson;
-    Json::Reader reader;
+using json = nlohmann::json;
 
-    reader.parse(file, actualJson);
+bool Parser::validateJsonObject(json jsonObject) {
+  // Validate # of elements
+  if (jsonObject.size() != 6) {
+    return false;
+  }
 
-    std::cout<< "Total json data: \n" << actualJson <<std::endl;
-    std::cout<< "Configuration: " << actualJson["configuration"] <<std::endl;
-    std::cout<< "Contants: " << actualJson["constants"] <<std::endl;
-    std::cout<< "Variables: " << actualJson["variables"] <<std::endl;
-    std::cout<< "Per-Player: " << actualJson["per-player"] <<std::endl;
-    std::cout<< "Per-Audience: " << actualJson["per-audience"] <<std::endl;
-    std::cout<< "Per-Audience: " << actualJson["per-audience"] <<std::endl;
-    std::cout<< "Rules: " << actualJson["rules"] <<std::endl;
+  //validate root level elements
+  if(!jsonObject.contains("configuration") || !jsonObject.contains("constants") || !jsonObject.contains("variables") || !jsonObject.contains("per-player") || !jsonObject.contains("per-audience") || !jsonObject.contains("rules")) {
+    return false;
+  }
 
-    auto config = actualJson["configuration"];
-    std::cout<< "Audience: " << config["audience"] <<std::endl; 
-    std::cout<< "Name: " << config["name"] <<std::endl;
-    std::cout<< "Player Count: " << config["player count"] <<std::endl;
-    std::cout<< "setup: " << config["setup"] <<std::endl;
-
-    bool audience = config["audience"].asBool();
-
-    std::cout<<audience<<std::endl;
-
-    //we can add to a map this way
-
-    std::map<std::string, Json::Value> configurations;
-    configurations["audience"] = config["audience"];
-    configurations["name"] = config["name"];
-    configurations["player_count"] = config["player count"];
-    configurations["setup"] = config["setup"];
-
-    for(std::map<std::string, Json::Value>::iterator ii=configurations.begin(); ii!=configurations.end(); ++ii)  
-    {  
-       std::cout << (*ii).first << ": " << (*ii).second << std::endl;  
-    } 
-
-    //then call a config class for example this way
-
-    config::config newConfigurations(configurations);
-
-    //Or I could just parse all the values here in main and call the Config class with the right values
-
-    //Like this
-
-    bool audience = config["audience"].asBool();
-    std::string name = config["name"].asString();
-    auto player_count = config["player count"];
-    int max_player = player_count["max"].asInt();
-    int min_player = player_count["min"].asInt();
-    std::string setup = player_count["setup"].asString();
-
-    //then call the config class with the values as they are
-
-    config::config newConfigurations(audience, name, max_player, min_player, setup);
-
-    auto constants = actualJson["constants"];
-
-    auto variables = actualJson["variables"];
-
-    auto per_player = actualJson["per-player"];
-
-    auto per_audience = actualJson["per-audience"];
-
-    auto rules = actualJson["rules"];
-
-    Rules::Rules newRules(rules);
-
-    PerPlayer::PerPlayer newPlayerConfig(per_player);
-
-    PerAudience::PerAudience newAudienceConfig(per_audience);
-
-    return 0;
+  return true;
 }
 
+json Parser::parseJson(const std::string jsonSource) {
+  std::ifstream jsonFile(jsonSource);
+  //parse json file
+  json jsonObject = json::parse(jsonFile);
+  if (jsonObject == nullptr) {
+    //LOG(ERROR) << "Failed to read JSON file or filepath is incorrect"<< "formatted: returning nullptr";
+    return nullptr;
+  }
+
+  if (!validateJsonObject(jsonObject)) {
+    //LOG(ERROR) << "Failed to validate JSON object: returning nullptr";
+    return nullptr;
+  }
+
+  return jsonObject;
+}
+
+bool Parser::validateConfigurations(json config) {
+    // Validate # of elements
+    if (config.size() != 4) {
+        return false;
+    }
+
+    //validate root level elements
+    if(!config.contains("name") || !config.contains("player count") || !config.contains("audience") || !config.contains("setup")) {
+        return false;
+    }
+
+    //validate palyer count
+    json playerCount = config["player count"];
+    if(!playerCount.contains("max") || !playerCount.contains("min")){
+        return false;
+    }
+
+    return true;
+
+}
+
+bool Parser::validateRuleForEach(json rule) {
+    //validate # of elements
+    if (rule.size() != 4) {
+        return false;
+    }
+
+    //validate root level elements
+    if(!rule.contains("rule") || !rule.contains("list") || !rule.contains("element") || !rule.contains("rules")) {
+        return false;
+    }
+
+    return true;
+}
+
+bool Parser::validateRuleLoop(json rule) {
+    //validate # of elements
+    if (rule.size() != 3) {
+        return false;
+    }
+
+    //validate root level elements
+    if(rule.contains("rule") && (rule.contains("until") || rule.contains("while")) && !rule.contains("rules")) {
+        return true;
+    }
+
+    return false;
+
+}
+
+bool Parser::validateRuleInParallel(json rule) {
+    //validate # of elements
+    if (rule.size() != 2) {
+        return false;
+    }
+
+    //validate root level elements
+    if(!rule.contains("rule") || !rule.contains("rules")) {
+        return false;
+    }
+
+    return true;
+}
+
+bool Parser::validateRuleParallelFor(json rule) {
+    //validate # of elements
+    if (rule.size() != 4) {
+        return false;
+    }
+
+    //validate root level elements
+    if(!rule.contains("rule") || !rule.contains("list") || !rule.contains("element") || !rule.contains("rules")) {
+        return false;
+    }
+
+    return true;
+}
+
+bool Parser::validateRuleSwitch(json rule) {
+    //validate # of elements
+    if (rule.size() != 4) {
+        return false;
+    }
+
+    //validate root level elements
+    if(!rule.contains("rule") || !rule.contains("value") || !rule.contains("list") || !rule.contains("cases")) {
+        return false;
+    }
+
+    return true;
+}
+
+bool Parser::validateRuleWhen(json rule) {
+    //validate # of elements
+    if (rule.size() != 2) {
+        return false;
+    }
+
+    //validate root level elements
+    if(!rule.contains("rule") || !rule.contains("cases")) {
+        return false;
+    }
+
+    return true;
+}
+
+bool Parser::validateRuleExtend(json rule) {
+    //validate # of elements
+    if (rule.size() != 3) {
+        return false;
+    }
+
+    //validate root level elements
+    if(!rule.contains("rule") || !rule.contains("target") || !rule.contains("list")) {
+        return false;
+    }
+
+    return true;
+}
+
+bool Parser::validateRuleReverse(json rule) {
+    //validate # of elements
+    if (rule.size() != 2) {
+        return false;
+    }
+
+    //validate root level elements
+    if(!rule.contains("rule") || !rule.contains("list")) {
+        return false;
+    }
+
+    return true;
+}
+
+bool Parser::validateRuleShuffle(json rule) {
+    //validate # of elements
+    if (rule.size() != 2) {
+        return false;
+    }
+
+    //validate root level elements
+    if(!rule.contains("rule") || !rule.contains("list")) {
+        return false;
+    }
+
+    return true;
+}
+
+bool Parser::validateRuleSort(json rule) {
+    //validate # of elements
+    if (rule.size() != 2 || rule.size() != 3) {
+        return false;
+    }
+
+    //validate root level elements
+    if(rule.size() == 2) {
+        if(!rule.contains("rule") || !rule.contains("list")) {
+            return false;
+        }
+    } else {
+        if(!rule.contains("rule") || !rule.contains("list") || !rule.contains("key")) {
+            return false;
+        }
+    }
+    
+    return true;
+}
+
+bool Parser::validateRuleDeal(json rule) {
+    //validate # of elements
+    if (rule.size() != 4) {
+        return false;
+    }
+
+    //validate root level elements
+    if(!rule.contains("rule") || !rule.contains("from") || !rule.contains("to") || !rule.contains("count")) {
+        return false;
+    }
+
+    return true;
+}
+
+bool Parser::validateRuleDiscard(json rule) {
+    //validate # of elements
+    if (rule.size() != 3) {
+        return false;
+    }
+
+    //validate root level elements
+    if(!rule.contains("rule") || !rule.contains("from") || !rule.contains("count")) {
+        return false;
+    }
+
+    return true;
+}
+
+bool Parser::validateRuleAdd(json rule) {
+    //validate # of elements
+    if (rule.size() != 3) {
+        return false;
+    }
+
+    //validate root level elements
+    if(!rule.contains("rule") || !rule.contains("to") || !rule.contains("value")) {
+        return false;
+    }
+
+    return true;
+}
+
+bool Parser::validateRuleTimer(json rule) {
+    //validate # of elements
+    if (rule.size() != 4 || rule.size() != 5) {
+        return false;
+    }
+
+    //validate root level elements
+    if(rule.size() == 4) {
+        if(!rule.contains("rule") || !rule.contains("duration") || !rule.contains("mode") || !rule.contains("rules")) {
+            return false;
+        }
+    } else {
+        if(!rule.contains("rule") || !rule.contains("duration") || !rule.contains("mode") || !rule.contains("rules") || !rule.contains("flag")) {
+            return false;
+        }
+    }
+    
+    return true;
+}
+
+bool Parser::validateRuleInputChoice(json rule) {
+    //validate # of elements
+    if (rule.size() != 5 || rule.size() != 6) {
+        return false;
+    }
+
+    //validate root level elements
+    if(rule.size() == 5) {
+        if(!rule.contains("rule") || !rule.contains("to") || !rule.contains("prompt") || !rule.contains("choices") || !rule.contains("result")) {
+            return false;
+        }
+    } else {
+        if(!rule.contains("rule") || !rule.contains("to") || !rule.contains("prompt") || !rule.contains("choices") || !rule.contains("result") || !rule.contains("timeout")) {
+            return false;
+        }
+    }
+    
+    return true;
+}
+
+bool Parser::validateRuleInputText(json rule) {
+    //validate # of elements
+    if (rule.size() != 4 || rule.size() != 5) {
+        return false;
+    }
+
+    //validate root level elements
+    if(rule.size() == 4) {
+        if(!rule.contains("rule") || !rule.contains("to") || !rule.contains("prompt") || !rule.contains("result")) {
+            return false;
+        }
+    } else {
+        if(!rule.contains("rule") || !rule.contains("to") || !rule.contains("prompt") || !rule.contains("result") || !rule.contains("timeout")) {
+            return false;
+        }
+    }
+    
+    return true;
+}
+
+bool Parser::validateRuleInputVote(json rule) {
+    //validate # of elements
+    if (rule.size() != 5 || rule.size() != 6) {
+        return false;
+    }
+
+    //validate root level elements
+    if(rule.size() == 5) {
+        if(!rule.contains("rule") || !rule.contains("to") || !rule.contains("prompt") || !rule.contains("choices") || !rule.contains("result")) {
+            return false;
+        }
+    } else {
+        if(!rule.contains("rule") || !rule.contains("to") || !rule.contains("prompt") || !rule.contains("choices") || !rule.contains("result") || !rule.contains("timeout")) {
+            return false;
+        }
+    }
+    
+    return true;
+}
+
+bool Parser::validateRuleMessage(json rule) {
+    //validate # of elements
+    if (rule.size() != 3) {
+        return false;
+    }
+
+    //validate root level elements
+    if(!rule.contains("rule") || !rule.contains("to") || !rule.contains("value")) {
+        return false;
+    }
+
+    return true;
+}
+
+bool Parser::validateRuleGlobalMessage(json rule) {
+    //validate # of elements
+    if (rule.size() != 2) {
+        return false;
+    }
+
+    //validate root level elements
+    if(!rule.contains("rule") || !rule.contains("value")) {
+        return false;
+    }
+
+    return true;
+}
+
+bool Parser::validateRuleScores(json rule) {
+    //validate # of elements
+    if (rule.size() != 3) {
+        return false;
+    }
+
+    //validate root level elements
+    if(!rule.contains("rule") || !rule.contains("score") || !rule.contains("ascending")) {
+        return false;
+    }
+
+    return true;
+}
+
+json Parser::parseConfigurations(json data) {
+    if(data["configurations"] == nullptr){
+        return nullptr;
+    }
+
+    json config = data["configurations"];
+    bool check = validateConfigurations(config);
+    if(!check) {
+        return nullptr;
+    }
+
+    return config;
+}
+
+json Parser::parseConstants(json data) {
+    if(data["constants"] == nullptr) {
+        return nullptr;
+    }
+
+    json constants = data["constants"];
+    return constants;
+}
+
+json Parser::parseRules(json data) {
+    if(data["rules"] == nullptr){
+        return nullptr;
+    }
+    auto rules = data["rules"];
+    return rules;
+}
+
+bool Parser::validateRule(json data) {
+    if(!data.contains("rule")) {
+        return false;
+    }
+
+    std::string ruleType = data["rule"];
+    bool check = false;
+    if(ruleType == "foreach") {
+        check = validateRuleForEach(data);
+        return check;
+    } else if(ruleType == "loop") {
+        check = validateRuleLoop(data);
+        return check;
+    } else if(ruleType == "inparallel") {
+        check = validateRuleInParallel(data);
+        return check;
+    } else if(ruleType == "parallelfor") {
+        check = validateRuleParallelFor(data);
+        return check;
+    } else if(ruleType == "switch") {
+        check = validateRuleSwitch(data);
+        return check;
+    } else if(ruleType == "when") {
+        check = validateRuleWhen(data);
+        return check;
+    } else if(ruleType == "extend") {
+        check = validateRuleExtend(data);
+        return check;
+    } else if(ruleType == "reverse") {
+        check = validateRuleReverse(data);
+        return check;
+    } else if(ruleType == "shuffle") {
+        check = validateRuleShuffle(data);
+        return check;
+    } else if(ruleType == "sort") {
+        check = validateRuleSort(data);
+        return check;
+    } else if(ruleType == "deal") {
+        check = validateRuleDeal(data);
+        return check;
+    } else if(ruleType == "discard") {
+        check = validateRuleDiscard(data);
+        return check;
+    } else if(ruleType == "add") {
+        check = validateRuleAdd(data);
+        return check;
+    } else if(ruleType == "timer") {
+        check = validateRuleTimer(data);
+        return check;
+    } else if(ruleType == "input-choice") {
+        check = validateRuleInputChoice(data);
+        return check;
+    } else if(ruleType == "input-text") {
+        check = validateRuleInputText(data);
+        return check;
+    } else if(ruleType == "input-vote") {
+        check = validateRuleInputVote(data);
+        return check;
+    } else if(ruleType == "message") {
+        check = validateRuleMessage(data);
+        return check;
+    } else if(ruleType == "global-message") {
+        check = validateRuleGlobalMessage(data);
+        return check;
+    } else if(ruleType == "scores") {
+        check = validateRuleScores(data);
+        return check;
+    } else {
+        return check;
+    }
+}
