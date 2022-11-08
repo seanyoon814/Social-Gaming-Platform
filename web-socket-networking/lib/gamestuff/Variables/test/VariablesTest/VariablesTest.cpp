@@ -1,27 +1,29 @@
 #include <gtest/gtest.h>
 
-// Constant.h
+// Variables.h
 #include <map>
 #include <string>
 #include "Data.h"
 
-class Constant
+class Variables
 {
 public:
-    // constructor
-    Constant(std::map<std::string, Data> constant);
-    // Get a specific constant values
-    Data getConstant(std::string name);
-    // Add a constant
-    void addConstant(std::string name, Data value);
-    // Get size of constant map
+    // Constructor
+    Variables(std::map<std::string, Data> variables);
+    // Get a specific variable value
+    Data getVariable(std::string name);
+    // Add a variable
+    void addVariable(std::string name, Data value);
+    // Remove a variable
+    void removeVariable(std::string name);
+    // Get size of variable map
     int getSize();
 
 private:
-    std::map<std::string, Data> constant;
+    std::map<std::string, Data> variables;
 };
 
-TEST(ConstantTest, DifferentTypes)
+TEST(VariablesTest, DifferentTypes)
 {
     StringObj a{"test"};
     IntObj b{1};
@@ -30,11 +32,11 @@ TEST(ConstantTest, DifferentTypes)
     temp.insert(std::pair<std::string, Data>("int", b));
     temp.insert(std::pair<std::string, Data>("string", a));
     temp.insert(std::pair<std::string, Data>("float", c));
-    Constant test(temp);
+    Variables test(temp);
     ASSERT_NE(nullptr, test);
 }
 
-TEST(ConstantTest, getConstant)
+TEST(VariablesTest, getVariable)
 {
     std::map<std::string, Data> temp;
     std::string testName("string");
@@ -42,15 +44,15 @@ TEST(ConstantTest, getConstant)
     temp.insert(std::pair<std::string, Data>("int", b));
     StringObj a{"test"};
     temp.insert(std::pair<std::string, Data>(testName, a));
-    Constant test(temp);
+    Variables test(temp);
     Data result;
-    result = test.getConstant(testName);
-    std::cout << "getConstant(): text = ";
+    result = test.getVariable(testName);
+    std::cout << "getVariable(): text = ";
     std::cout << result << std::endl;
     ASSERT_TRUE(true);
 }
 
-TEST(ConstantTest, getSize)
+TEST(VariablesTest, getSize)
 {
     StringObj a{"test"};
     IntObj b{1};
@@ -59,11 +61,11 @@ TEST(ConstantTest, getSize)
     temp.insert(std::pair<std::string, Data>("int", b));
     temp.insert(std::pair<std::string, Data>("string", a));
     temp.insert(std::pair<std::string, Data>("float", c));
-    Constant test(temp);
+    Variables test(temp);
     ASSERT_EQ(test.getSize(), 3);
 }
 
-TEST(ConstantTest, addConstant)
+TEST(VariablesTest, addVariable)
 {
     StringObj a{"test"};
     IntObj b{1};
@@ -72,12 +74,30 @@ TEST(ConstantTest, addConstant)
     temp.insert(std::pair<std::string, Data>("int", b));
     temp.insert(std::pair<std::string, Data>("string", a));
     temp.insert(std::pair<std::string, Data>("float", c));
-    Constant test(temp);
-    std::cout << "Before addConstant(): 3 = ";
+    Variables test(temp);
+    std::cout << "Before addVariable(): 3 = ";
     std::cout << test.getSize() << std::endl;
     StringObj d("test2");
-    test.addConstant("string2", d);
-    std::cout << "After addConstant(): 4 = ";
+    test.addVariable("string2", d);
+    std::cout << "After addVariable(): 4 = ";
+    std::cout << test.getSize() << std::endl;
+    ASSERT_TRUE(true);
+}
+
+TEST(VariablesTest, addVariable)
+{
+    StringObj a{"test"};
+    IntObj b{1};
+    FloatObj c{1.0};
+    std::map<std::string, Data> temp;
+    temp.insert(std::pair<std::string, Data>("int", b));
+    temp.insert(std::pair<std::string, Data>("string", a));
+    temp.insert(std::pair<std::string, Data>("float", c));
+    Variables test(temp);
+    std::cout << "Before removeVariable(): 3 = ";
+    std::cout << test.getSize() << std::endl;
+    test.removeVariable("int");
+    std::cout << "After removeVariable(): 2 = ";
     std::cout << test.getSize() << std::endl;
     ASSERT_TRUE(true);
 }
