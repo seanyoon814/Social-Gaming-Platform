@@ -1,6 +1,3 @@
-/* Multi threaded server source: https://github.com/botaojia/chat
-    Modified for multi chat room functionality using create/join commands
-*/
 #include <ctime>
 #include <string>
 #include <deque>
@@ -14,13 +11,17 @@
 #include <algorithm>
 #include <iomanip>
 #include <array>
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 #include <boost/asio.hpp>
 #include <boost/thread/thread.hpp>
+#include <boost/uuid/uuid.hpp>            
+#include <boost/uuid/uuid_generators.hpp> 
+#include <boost/uuid/uuid_io.hpp>         
 #include "protocol.hpp"
 #include "include/tcpserver.hpp"
 
 using boost::asio::ip::tcp;
+using namespace boost::placeholders;
 using namespace std;
 
 namespace
@@ -258,8 +259,16 @@ private:
 std::mutex roomMutex;
 void createRoom(int &nextPort, std::unordered_map<std::string,std::string> &roomInfo)
 {
+    //Uses mutex to update roomInfo map and increment port number for thread-safety
     std::lock_guard<std::mutex> guard(roomMutex);
     nextPort++;
+    // boost::uuids::uuid uuid = boost::uuids::random_generator()();
+    // std::cout << uuid << std::endl;
+    hash<std::string> hashfunc;
+    std::cout << hashfunc(std::to_string(nextPort)) <<std::endl;
+    fflush(stdout);
+    auto key = hashfunc(std::to_string(nextPort));
+    roomInfo.insert({std::to_string(key),std::to_string(nextPort)});
 }
 
 int mainServer(){
@@ -369,4 +378,3 @@ int main(int argc, char* argv[])
 
     return 0;
 }
-

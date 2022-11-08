@@ -154,11 +154,8 @@ void mainClient(std::string& roomNum)
                 tcpSocket.Send("create");
                 while(roomNum.empty()){
                     //wait for response
-                    sleep(0.1);
+                    sleep(0.01);
                 }
-                // std::istringstream input2;
-                // input2.str("4001\n");
-                // std::getline(input2, roomNum);
                 break;
             }else{
                 //join room
@@ -250,5 +247,4 @@ int main(int argc, char* argv[])
 
     return 0;
 }
-
 
