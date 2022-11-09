@@ -1,74 +1,69 @@
-// #include "../include/Config.h"
 #include "Config.h"
-#include <jsoncpp/json/value.h>
-#include <jsoncpp/json/json.h>
+// #include "Config.h"
+#include "nlohmann/json.hpp"
 #include <gtest/gtest.h>
 #include <fstream>
 #include <iostream>
+using json = nlohmann::json;
 using namespace std;
 std::ifstream RPS("RPS.json");
 std::ifstream defaultV("default.json");
 std::ifstream brokenV("wrongVal.json");
 std::ifstream brokenK("wrongKey.json");
 std::ifstream minGreater("mingreatermax.json");
-TEST(ConfigJSONTest, DefaultValues){
-    Json::Value actualJson;
-    Json::Reader reader;
-    reader.parse(defaultV, actualJson);
-    Json::Value config = actualJson["configuration"];
+json j = json::parse(RPS);
+TEST(ConfigJSONTest, DefaultValues)
+{
+    json j = json::parse(defaultV);
+    json config = j["configuration"];
     Config c{config};
     c.setVariables();
     ASSERT_EQ(true, c.assertJSON());
 }
 TEST(ConfigJSONTest, AssertFunctionRightValues){
-    Json::Value actualJson;
-    Json::Reader reader;
-    reader.parse(RPS, actualJson);
-    Json::Value config = actualJson["configuration"];
+    json config = j["configuration"];
     Config c{config};
     c.setVariables();
     ASSERT_EQ(true, c.assertJSON());
 }
 TEST(ConfigJSONTest, AssertFunctionWrongValues){
-    Json::Value actualJson;
-    Json::Reader reader;
-    reader.parse(brokenV, actualJson);
-    Json::Value config = actualJson["configuration"];
+    json j = json::parse(brokenV);
+    json config = j["configuration"];
     Config c{config};
     c.setVariables();
     ASSERT_EQ(false, c.assertJSON());
 }
 TEST(ConfigJSONTest, AssertFunctionWrongKeys){
-    Json::Value actualJson;
-    Json::Reader reader;
-    reader.parse(brokenK, actualJson);
-    Json::Value config = actualJson["configuration"];
+    json j = json::parse(brokenK);
+    json config = j["configuration"];
     Config c{config};
-    c.setVariables();
+    // c.setVariables();
     ASSERT_EQ(false, c.assertJSON());
 }
 TEST(ConfigJSONTest, MinPlayersMoreThanMax){
-    Json::Value actualJson;
-    Json::Reader reader;
-    reader.parse(brokenK, actualJson);
-    Json::Value config = actualJson["configuration"];
+    json j = json::parse(minGreater);
+    json config = j["configuration"];
     Config c{config};
     c.setVariables();
     ASSERT_EQ(false, c.assertJSON());
 }
 TEST(ConfigJSONTest, RockPaperScissors){
-    Json::Value actualJson;
-    Json::Reader reader;
-    reader.parse(RPS, actualJson);
-    Json::Value config = actualJson["configuration"];
+    json config = j["configuration"];
     Config c{config};
     c.setVariables();
     ASSERT_EQ(true, c.assertJSON());
-    ASSERT_EQ(false, c.json["audience"].asBool());
-    ASSERT_EQ("Rock, Paper, Scissors", c.json["name"].asString());
-    ASSERT_EQ(2, c.json["player count"]["min"].asInt());
-    ASSERT_EQ(4, c.json["player count"]["max"].asInt());
-    ASSERT_EQ(10, c.json["setup"]["Rounds"].asInt());
+    json rpsConfig = c.getJSON();
+    ASSERT_EQ(false, config["audience"].get<bool>());
+    ASSERT_EQ("Rock, Paper, Scissors", config["name"].get<std::string>());
+    ASSERT_EQ(2, config["player count"]["min"].get<int>());
+    ASSERT_EQ(4, config["player count"]["max"].get<int>());
+    ASSERT_EQ(10, config["setup"]["Rounds"].get<int>());
+}
+int main(int argc, char **argv)
+{
+    ::testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
+    return 0;
 }
 
 

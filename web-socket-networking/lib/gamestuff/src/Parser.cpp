@@ -2,8 +2,8 @@
 #include <fstream>
 #include <string>
 #include <map>
-#include <glog/logging.h>
-#include "JsonParser.h"
+// #include <glog/logging.h>
+#include "../include/Parser.h"
 #include "nlohmann/json.hpp"
 
 using json = nlohmann::json;

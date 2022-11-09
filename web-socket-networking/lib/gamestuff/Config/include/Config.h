@@ -5,11 +5,10 @@
 #include <algorithm>
 #include <stdlib.h>
 #include <iostream>
-#include <jsoncpp/json/value.h>
-#include <jsoncpp/json/json.h>
-
+// #include "Parser.h"
+#include "nlohmann/json.hpp"
 #define defaultRounds 10;
-
+using json = nlohmann::json;
 struct GameSetup{
     //number of rounds
     int rounds = defaultRounds;
@@ -26,7 +25,7 @@ struct GameSetup{
 class Config{
     public:
         //Config constructor
-        Config(Json::Value json);
+        Config(json j);
         //Create the game setup. Not creating game setup will result in default rounds of 10.
         void setGameSetup();
         //Change the min number of players
@@ -36,23 +35,23 @@ class Config{
         //change the name of the game
         void setName() noexcept;
         void setAudience() noexcept;
-        void setJSON(Json::Value j);
-        map<string, Json::Value> getJSON() const;
+        void setJSON(json j);
+        json getJSON() const;
         //return game setup struct
         GameSetup getSetup()noexcept;
         //Assert the things in the json
         bool assertJSON();
         //set values from JSON file into Config class
         void setVariables();
-        //set setup bool variable
-        void setSetup(bool n);
+        //set setup
+        void setSetup();
         int getMin();
-        map<string, Json::Value> json;
-        string getName();
+        std::string getName();
+        bool checkSetupParameters();
     private:
         //Name of the game
-        vector<string> attributes = {"name", "player count", "audience", "setup", "min", "max", "audience"};
-        string name;
+        std::vector<std::string> attributes = {"name", "player count", "audience", "setup", "min", "max", "audience"};
+        std::string name;
         //Minimum number of players
         int min;
         //Maximum number of players
@@ -63,7 +62,7 @@ class Config{
         //Will need to adjust this struct later according to type of game in a later iteration
         GameSetup setup;
         bool hasSetup;
+        json jsonMap;
         //to get config
-        Json::Value val;
 };
-}
+
