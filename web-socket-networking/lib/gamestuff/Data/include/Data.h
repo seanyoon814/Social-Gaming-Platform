@@ -2,7 +2,9 @@
 #include <string>
 #include <ostream>
 #include <list>
-
+using std::string;
+using std::shared_ptr;
+using std::map;
 // Data
 class Data
 {
@@ -63,11 +65,11 @@ private:
 class MapObj : public Data
 {
 public:
-    MapObj(const std::map<Data, Data> &value);
-    std::map<Data, Data> getValue() const;
+    MapObj(map<string, shared_ptr<Data>> value);
+    map<string, shared_ptr<Data>> getValue() const;
 
 private:
-    std::map<Data, Data> value;
+    map<string, shared_ptr<Data>> value;
 };
 
 // List

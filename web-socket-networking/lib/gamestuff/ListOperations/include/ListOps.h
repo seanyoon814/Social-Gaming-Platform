@@ -10,41 +10,19 @@
 #include <memory>
 #include <vector>
 #include <string>
+#include <unordered_map>
+#include "Data.h"
 
 using std::string;
 using std::vector;
 using std::ostream;
 using std::shared_ptr;
+using std::map;
+using std::vector;
 
 
 
-class Data{
-public:
-    explicit Data(const std::string& name);
-    std::string getName() const;
-    virtual ostream& output(ostream& out) const;
-    friend std::ostream& operator<<(std::ostream& out, Data const& data);
-private:
-    std::string name;
-};
 
-class StringObj : public Data{
-public:
-    StringObj(const std::string& name, const std::string&  value);
-    string getValue() const;
-    ostream& output(ostream& out) const override;
-//     bool comparator()
-private:
-    std::string value;
-};
-
-class IntObj : public Data{
-public:
-    IntObj(const std::string& name, const int&  value);
-
-private:
-    int value;
-};
 
 
 class Rules{
@@ -53,75 +31,75 @@ public:
 };
 
 
-using dataVector = std::vector<std::shared_ptr<Data>>;
-using vectorsData = std::vector<dataVector>;
+using dataVector = shared_ptr<vector<std::shared_ptr<Data>>>;
+using dataMap = shared_ptr<map<string, shared_ptr<Data>>>;
+using dataPtr = std::shared_ptr<Data>;
+
 
 class ListExtend : virtual Rules {
 public:
-    ListExtend(vectorsData& target, const dataVector& list);
+    ListExtend(dataVector &target, dataVector& list);
+    ListExtend(dataMap &target, dataMap& list);
     void runRule() override;
 private:
-    dataVector list;
-    vectorsData* target = nullptr;
+    dataVector* listVector = nullptr;
+    dataVector* targetVector = nullptr;
+    dataMap * listMap = nullptr;
+    dataMap* targetMap = nullptr;
 };
 
 class ListReverse : virtual Rules {
 public:
-    ListReverse(vectorsData& list);
-    ListReverse(dataVector& dataVector);
+    ListReverse(dataVector& list);
+    ListReverse(dataMap& map);
 
     void runRule() override;
 private:
-    vectorsData* list = nullptr;
-    dataVector* datavctr = nullptr;
+    dataVector* list = nullptr;
+    dataMap* map = nullptr;
 };
 
 class ListShuffle : virtual Rules {
 public:
-    ListShuffle(vectorsData& list);
     ListShuffle(dataVector& datavctr);
-    void runRule();
+    void runRule() override;
 private:
-    vectorsData* list = nullptr;
     dataVector* datavctr = nullptr;
 };
 
 
-//template <typename T>
 class ListSort : virtual Rules {
 public:
-    ListSort(vectorsData& list);
-    ListSort(dataVector & datavctr);
-    // ListSort<T>(vectorsData& list, T key);
-    // ListSort<T>(dataVector & datavctr, T key);
-    void runRule();
+    ListSort(dataVector & vctr);
+    ListSort(dataVector & vctr, string  key);
+    void runRule() override;
 private:
-    vectorsData* list = nullptr;
-    dataVector* datavctr = nullptr;
+//    datMap* map = nullptr;
+    dataVector* vctr = nullptr;
     bool hasKey = false;
-    //T key;
+    string key;
 };
 
 class ListDeal : virtual Rules {
 public:
-    ListDeal(vectorsData& list, vectorsData& to, int ct);
+    ListDeal(dataVectorContainer& list, dataVectorContainer& to, int ct);
     ListDeal(dataVector & datavctr, dataVector& to,int ct);
     void runRule();
 private:
-    vectorsData* list = nullptr;
+    dataVectorContainer* list = nullptr;
     dataVector* datavctr = nullptr;
-    vectorsData* toList = nullptr;
+    dataVectorContainer* toList = nullptr;
     dataVector* toDatavctr = nullptr;
     int count;
 };
 
 class ListDiscard : virtual Rules {
 public:
-    ListDiscard(vectorsData& list,int ct);
+    ListDiscard(dataVectorContainer& list,int ct);
     ListDiscard(dataVector& datavctr, int ct);
     void runRule();
 private:
-    vectorsData* list = nullptr;
+    dataVectorContainer* list = nullptr;
     dataVector* datavctr = nullptr;
     int count;
 };
@@ -138,13 +116,13 @@ private:
 //
 //template <typename T>
 //class ListDeal : virtual Rules {
-//    ListDeal(const std::string& from, const std::string& to, const int& count, vectorsData list);
+//    ListDeal(const std::string& from, const std::string& to, const int& count, dataVectorContainer list);
 //    void runRule();
 //private:
 //    const string from;
 //    const string to;
 //    const int count;
-//    vectorsData list;
+//    dataVectorContainer list;
 //};
 //
 //template <typename T>
@@ -155,7 +133,7 @@ private:
 //    const string from;
 //    const string to;
 //    const int count;
-//    vectorsData list;
+//    dataVectorContainer list;
 //};
 
 

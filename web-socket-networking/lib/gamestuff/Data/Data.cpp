@@ -2,6 +2,7 @@
 #include <string>
 #include <ostream>
 #include <list>
+#include <unordered_map>
 #include "Data.h"
 
 // Data
@@ -63,9 +64,9 @@ bool BoolObj::getValue() const
 // }
 
 // Map
-MapObj::MapObj(const std::map<Data, Data> &value) : value(value) {}
+MapObj::MapObj(unordered_map<string, shared_ptr<Data>> value) : value(std::move(value)) {}
 
-std::map<Data, Data> MapObj::getValue() const
+unordered_map<string, shared_ptr<Data>> MapObj::getValue() const
 {
     return value;
 }
