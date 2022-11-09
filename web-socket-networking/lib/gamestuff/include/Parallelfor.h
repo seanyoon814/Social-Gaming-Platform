@@ -6,11 +6,11 @@ class Parallelfor: public virtual Rules {
         std::vector<Rules> rules;
         std::list<int> list;
     public:
-        Parallelfor(std::vector<Rules> rules, List list);
+        Parallelfor(std::vector<Rules> rules, std::list<int> list);
 
         std::vector<Rules> getRules();
 
-        std::list getList();
+        std::list<int> getList();
 
         void runRule();
 

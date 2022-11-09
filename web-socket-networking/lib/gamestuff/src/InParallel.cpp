@@ -1,4 +1,4 @@
-#include "Inparallel.h"
+#include "InParallel.h"
 
 Inparallel::Inparallel(std::vector<Rules> ruleList) {
     rules = rules;
