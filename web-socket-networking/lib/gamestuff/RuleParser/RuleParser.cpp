@@ -3,168 +3,150 @@
 #include <vector>
 #include <map>
 #include <memory>
-#include <jsoncpp/json/value.h>
-#include <jsoncpp/json/json.h>
+#include "../include/Parser.h"
 // #include "../include/Rules.h"
 // #include "../include/Foreach.h"
 using namespace std;
-
+using json = nlohmann::json;
 
 std::ifstream test("../../../data/config1.json");
 //Rules parser outline, currently only prints out the rule data/elements
 //Eventually will create and return a vector of rules
-void parseRules(Json::Value val)
+void parseRules(json rules)
 {
-    string ruleName = val["rule"].asString();
-    if (ruleName == "foreach")
+    for(auto rule: rules)
     {
-        cout << "list: " << val["list"] << endl;
-        cout << "element: " << val["element"] << endl;
-        for(auto rule:val["rules"])
+        string ruleName = rule["rule"];
+        if (ruleName == "foreach")
         {
-            parseRules(rule);
-        }
-    } else if (ruleName == "global-message")
-    {
-        cout << "value: " << val["value"] << endl;
-    } else if (ruleName == "scores")
-    {
-        cout << "score: " << val["score"] << endl;
-        cout << "ascending: " << val["ascending"] << endl;
-    } else if (ruleName == "parallelfor")
-    {
-        cout << "list: " << val["list"] << endl;
-        cout << "element: " << val["element"] << endl;
-        for(auto rule:val["rules"])
+            cout << "list: " << rule["list"] << endl;
+            cout << "element: " << rule["element"] << endl;
+            parseRules(rule["rules"]);
+        } else if (ruleName == "global-message")
         {
-            parseRules(rule);
-        }
-    } else if (ruleName == "loop")
-    {
-        if (val["until"] != nullptr)
+            cout << "value: " << rule["value"] << endl;
+        } else if (ruleName == "scores")
         {
-            cout << "until: " << val["until"] << endl;
-        } else
+            cout << "score: " << rule["score"] << endl;
+            cout << "ascending: " << rule["ascending"] << endl;
+        } else if (ruleName == "parallelfor")
         {
-            cout << "while: " << val["while"] << endl;
-        }
-        for(auto rule:val["rules"])
+            cout << "list: " << rule["list"] << endl;
+            cout << "element: " << rule["element"] << endl;
+            parseRules(rule["rules"]);
+        } else if (ruleName == "loop")
         {
-            parseRules(rule);
-        }
-    } else if (ruleName == "inparallel")
-    {
-        for(auto rule:val["rules"])
-        {
-            parseRules(rule);
-        }
-    } else if (ruleName == "switch")
-    {
-        cout << "value: " << val["value"] << endl;
-        for(auto cases: val["cases"])
-        {
-            cout << "condition: " << cases["condition"] << endl;
-            parseRules(cases["rules"]);
-        }
-    } else if (ruleName == "when")
-    {
-        for(auto cases: val["cases"])
-        {
-            cout << "condition: " << cases["condition"] << endl;
-            for(auto rule: cases["rules"])
+            if (rule["until"] != nullptr)
+            {
+                cout << "until: " << rule["until"] << endl;
+            } else
+            {
+                cout << "while: " << rule["while"] << endl;
+            }
+            for(auto rule:rule["rules"])
             {
                 parseRules(rule);
             }
-        }
-    } else if (ruleName == "extend")
-    {
-        cout << "target: " << val["target"] << endl;
-        cout << "list: " << val["list"] << endl;
-    } else if (ruleName == "reverse")
-    {
-        cout << "list: " << val["list"] << endl;
-    } else if (ruleName == "shuffle")
-    {
-        cout << "list: " << val["list"] << endl;
-    } else if (ruleName == "sort")
-    {
-        if (val["key"] != nullptr)
+        } else if (ruleName == "inparallel")
         {
-            cout << "key: " << endl;
-        }
-        cout << "list: " << val["list"] << endl;
-    } else if (ruleName == "deal")
-    {
-        cout << "from: " << val["from"] << endl;
-        cout << "to: " << val["to"] << endl;
-        cout << "count: " << val["count"] << endl;
-    } else if (ruleName == "add")
-    {
-        cout << "to: " << val["to"] << endl;
-        cout << "value: " << val["value"] << endl;
-    } else if (ruleName == "discard")
-    {
-        cout << "from: " << val["from"] << endl;
-        cout << "count: " << val["count"] << endl;
-    } else if (ruleName == "timer")
-    {
-        cout << "duration: " << val["duration"] << endl;
-        cout << "mode: " << val["mode"] << endl;
-        for(auto rule:val["rules"])
+            parseRules(rule["rules"]);
+        } else if (ruleName == "switch")
         {
-            parseRules(rule);
-        }
-    } else if (ruleName == "input-choice")
-    {
-        cout << "to: " << val["to"] << endl;
-        cout << "prompt: " << val["prompt"] << endl;
-        cout << "choices: " << val["choices"] << endl;
-        cout << "result: " << val["result"] << endl;
-    
+            cout << "value: " << rule["value"] << endl;
+            for(auto cases: rule["cases"])
+            {
+                cout << "condition: " << cases["condition"] << endl;
+                parseRules(cases["rules"]);
+            }
+        } else if (ruleName == "when")
+        {
+            for(auto cases: rule["cases"])
+            {
+                cout << "condition: " << cases["condition"] << endl;
+                parseRules(cases["rules"]);
+            }
+        } else if (ruleName == "extend")
+        {
+            cout << "target: " << rule["target"] << endl;
+            cout << "list: " << rule["list"] << endl;
+        } else if (ruleName == "reverse")
+        {
+            cout << "list: " << rule["list"] << endl;
+        } else if (ruleName == "shuffle")
+        {
+            cout << "list: " << rule["list"] << endl;
+        } else if (ruleName == "sort")
+        {
+            if (rule.contains("key"))
+            {
+                cout << "key: " << rule["key"] << endl;
+            }
+            cout << "list: " << rule["list"] << endl;
+        } else if (ruleName == "deal")
+        {
+            cout << "from: " << rule["from"] << endl;
+            cout << "to: " << rule["to"] << endl;
+            cout << "count: " << rule["count"] << endl;
+        } else if (ruleName == "add")
+        {
+            cout << "to: " << rule["to"] << endl;
+            cout << "value: " << rule["value"] << endl;
+        } else if (ruleName == "discard")
+        {
+            cout << "from: " << rule["from"] << endl;
+            cout << "count: " << rule["count"] << endl;
+        } else if (ruleName == "timer")
+        {
+            cout << "duration: " << rule["duration"] << endl;
+            cout << "mode: " << rule["mode"] << endl;
+            parseRules(rule["rules"]);
+        } else if (ruleName == "input-choice")
+        {
+            cout << "to: " << rule["to"] << endl;
+            cout << "prompt: " << rule["prompt"] << endl;
+            cout << "choices: " << rule["choices"] << endl;
+            cout << "result: " << rule["result"] << endl;
         
-    } else if (ruleName == "input-text")
-    {
-        cout << "to: " << val["to"] << endl;
-        cout << "prompt: " << val["prompt"] << endl;
-        cout << "choices: " << val["choices"] << endl;
-        cout << "result: " << val["result"] << endl;
-        if (val["timeout"] != nullptr)
+            
+        } else if (ruleName == "input-text")
         {
-            cout << "timeout: " << val["timeout"] << endl;
-        }
-    } else if (ruleName == "input-vote")
-    {
-        cout << "to: " << val["to"] << endl;
-        cout << "prompt: " << val["prompt"] << endl;
-        cout << "choices: " << val["choices"] << endl;
-        cout << "result: " << val["result"] << endl;
-        if (val["timeout"] != nullptr)
+            cout << "to: " << rule["to"] << endl;
+            cout << "prompt: " << rule["prompt"] << endl;
+            cout << "choices: " << rule["choices"] << endl;
+            cout << "result: " << rule["result"] << endl;
+            if (rule.contains("timeout"))
+            {
+                cout << "timeout: " << rule["timeout"] << endl;
+            }
+        } else if (ruleName == "input-vote")
         {
-            cout << "timeout: " << val["timeout"] << endl;
+            cout << "to: " << rule["to"] << endl;
+            cout << "prompt: " << rule["prompt"] << endl;
+            cout << "choices: " << rule["choices"] << endl;
+            cout << "result: " << rule["result"] << endl;
+            if (rule.contains("timeout"))
+            {
+                cout << "timeout: " << rule["timeout"] << endl;
+            }
+        } else if (ruleName == "message")
+        {
+            cout << "to: " << rule["to"] << endl;
+            cout << "value: " << rule["value"] << endl;
+        } else
+        {
+            cout << "I either missed something or the rules were wrong" << endl;
         }
-    } else if (ruleName == "message")
-    {
-        cout << "to: " << val["to"] << endl;
-        cout << "value: " << val["value"] << endl;
-    } else
-    {
-        cout << "I either missed something or the rules were wrong" << endl;
-    }    
+    }
 }
 
 int main(int argc, char const *argv[])
 {
     //read json file
-    Json::Value actualJson;
-    Json::Reader reader;
-    reader.parse(test, actualJson);
     //do thing based on string rule
-    Json::Value rules = actualJson["rules"];
+    json file = json::parse(test);
+    json rules = file["rules"];
     //WorryMindYou where tf is my parser :concon:
-    for(auto rule: rules)
-    {
-        parseRules(rule);
-    }
+    parseRules(rules);
 
     return 0;
 }
