@@ -1,87 +1,94 @@
-// #include "include/Config.h"
 #include "Config.h"
-namespace std{
-
-Config::Config(Json::Value json)
+#include "nlohmann/json.hpp"
+#include <iostream>
+// #include "Parser.h"
+using json = nlohmann::json;
+Config::Config(json j)
 {
-    setJSON(json);
+    setJSON(j);
 }
-void Config::setJSON(Json::Value j)
+void Config::setJSON(json j)
 {
-    val = j;
+    jsonMap = j;
 }
 void Config::setGameSetup()
 {
-    json["setup"]["Rounds"] = val["setup"]["Rounds"];
-    setup.rounds = json["setup"]["Rounds"].asInt();
+    int numRounds = jsonMap["setup"]["Rounds"].get<int>();
+    setup.rounds = numRounds;
 }
 void Config::setMin() noexcept
 {
-    json["player count"]["min"] = val["player count"]["min"];
-    min = val["player count"]["min"].asInt();
+    int minPlayers = jsonMap["player count"]["min"].get<int>();
+    min = minPlayers;
 }
 void Config::setMax() noexcept
 {
-    json["player count"]["max"] = val["player count"]["max"];
-    max = json["player count"]["max"].asInt();
+    int maxPlayers = jsonMap["player count"]["max"].get<int>();
+    max = maxPlayers;
 }
 void Config::setName() noexcept
 {
-    json["name"] = val["name"];
-    name = json["name"].asString();
+    std::string gameName = jsonMap["name"].get<std::string>();
+    name = gameName;
 }
 void Config::setAudience() noexcept
 {
-    json["audience"] = val["audience"];
-    audience = json["audience"].asBool();
+    bool hasAudience = jsonMap["audience"].get<bool>();
+    audience = hasAudience;
 }
 GameSetup Config::getSetup() noexcept
 {
     return setup;
 }
-void Config::setSetup(bool n)
+json Config::getJSON() const
 {
-    hasSetup = n;
+    return jsonMap;
 }
-map<string, Json::Value> Config::getJSON() const
-{
-    return json;
-}
-string Config::getName()
+std::string Config::getName()
 {
     return name;
 }
-//these two must run 
+// //these two must run 
 bool Config::assertJSON()
 {
     //checking if the keys actually exist in the JSON config
-    for (auto const& val : json)
+    if(!jsonMap.contains("name") 
+    || !jsonMap.contains("player count") 
+    || !jsonMap.contains("audience") 
+    || !jsonMap.contains("setup")) 
     {
-        //if the key exists in JSON file
-        if(count(attributes.begin(), attributes.end(), val.first) == 0)
-        {
-            return false;
-        }
+        return false;
     }
-    if(json["name"].asString() != "" 
-    && json["player count"]["max"].asInt() >= 0
-    && json["player count"]["min"].asInt() >= 0
-    && json["player count"]["min"].asInt() <= json["player count"]["max"].asInt()
-    && (json["audience"].asBool() == true 
-    || json["audience"].asBool() == false))
+    json playerCount = jsonMap["player count"];
+    if(!playerCount.contains("max") || !playerCount.contains("min"))
+    {
+        return false;
+    }
+    if(jsonMap["name"].get<std::string>() != "" 
+    && jsonMap["player count"]["max"].get<int>() >= 0
+    && jsonMap["player count"]["min"].get<int>() >= 0
+    && jsonMap["player count"]["min"].get<int>() <= jsonMap["player count"]["max"].get<int>()
+    && (jsonMap["audience"].get<bool>() == true 
+    || jsonMap["audience"].get<bool>()  == false))
     {
         return true;
     }
     return false;
     //since setup does not need to have any attributes
 }
-
+bool Config::checkSetupParameters()
+{
+    return jsonMap["setup"].empty();
+}
 void Config::setVariables()
 {
     setMin();
     setMax();
     setName();
     setAudience();
-    setGameSetup();
+    if(!checkSetupParameters())
+    {
+        setGameSetup();
+    }
 }
-}
+
