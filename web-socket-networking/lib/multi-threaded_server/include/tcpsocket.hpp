@@ -87,7 +87,10 @@ public:
         std::thread t(TCPSocket::Receive, this);
         t.detach();
     }
-
+    int getSocket()
+    {
+        return sock;
+    }
     void setAddressStruct(sockaddr_in addr) {this->address = addr;}
     sockaddr_in getAddressStruct() const {return this->address;}
 

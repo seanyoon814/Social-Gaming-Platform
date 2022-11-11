@@ -10,7 +10,6 @@
 #include <boost/algorithm/string.hpp>
 #include "include/tcpsocket.hpp"
 
-
 using boost::asio::ip::tcp;
 using namespace std;
 
@@ -141,7 +140,13 @@ void mainClient(std::string& roomNum)
         // CONNECTION FAILED
         cout << errorCode << " : " << errorMessage << endl;
     });
-
+    // // tcpSocket.Send("create");
+    // while(true)
+    // {
+    //     std::cout << "Welcome to the main lobby!";
+    //     std::string text;
+    //     std::getline(std::cin, text);
+    // }
     std::string selectedcommand;
     std::cout << "1.Create\n2.Join\n";
     while(true){
@@ -194,7 +199,7 @@ int main(int argc, char* argv[])
     std::thread main_thread(mainClient, std::ref(roomNum));
     try
     {
-        if (argc != 4)
+        if (argc != 3)
         {
             std::cerr << "Usage: chat_client <nickname> <host> <port>\n";
             return 1;
@@ -229,10 +234,8 @@ int main(int argc, char* argv[])
             {
                 std::cin.clear(); //clean up error bit and try to finish reading
             }
-            if(strcmp (msg.data(),"create") == 0){
-                // not in use currently
-                // cli.close();
-                // t.detach();                
+            if(strcmp (msg.data(),"/create") == 0){
+                std::cout << "HELLO";                
             }else{
                 cli.write(msg);
             }            

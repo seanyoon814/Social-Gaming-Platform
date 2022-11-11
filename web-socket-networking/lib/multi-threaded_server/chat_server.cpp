@@ -348,25 +348,28 @@ int main(int argc, char* argv[])
         std::cout << "[" << std::this_thread::get_id() << "]" << "server starts" << std::endl;
 
         std::list < std::shared_ptr < server >> servers;
-        for (int i = 1; i < argc; ++i)
-        {
-            tcp::endpoint endpoint(tcp::v4(), std::atoi(argv[i]));
-            std::shared_ptr<server> a_server(new server(*io_service, *strand, endpoint));
-            servers.push_back(a_server);
-        }
+        tcp::endpoint endpoint(tcp::v4(), std::atoi("4000"));
+        std::shared_ptr<server> a_server(new server(*io_service, *strand, endpoint));
+        servers.push_back(a_server);
+        // for (int i = 1; i < argc; ++i)
+        // {
+        //     tcp::endpoint endpoint(tcp::v4(), std::atoi(argv[i]));
+        //     std::shared_ptr<server> a_server(new server(*io_service, *strand, endpoint));
+        //     servers.push_back(a_server);
+        // }
 
         boost::thread_group workers;
         for (int i = 0; i < 1; ++i)
         {
             boost::thread * t = new boost::thread{ boost::bind(&workerThread::run, io_service) };
 
-#ifdef __linux__
+            #ifdef __linux__
             // bind cpu affinity for worker thread in linux
             cpu_set_t cpuset;
             CPU_ZERO(&cpuset);
             CPU_SET(i, &cpuset);
             pthread_setaffinity_np(t->native_handle(), sizeof(cpu_set_t), &cpuset);
-#endif
+            #endif
             workers.add_thread(t);
         }
 
