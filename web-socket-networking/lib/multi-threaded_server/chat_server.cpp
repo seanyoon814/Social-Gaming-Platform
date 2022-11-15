@@ -114,10 +114,9 @@ public:
     {
         return name_table_[participant];
     }
-
+    std::unordered_set<std::shared_ptr<participant>> participants_;
 private:
     enum { max_recent_msgs = 100 };
-    std::unordered_set<std::shared_ptr<participant>> participants_;
     std::unordered_map<std::shared_ptr<participant>, std::string> name_table_;
     std::deque<std::array<char, MAX_IP_PACK_SIZE>> recent_msgs_;
 };
@@ -227,7 +226,7 @@ public:
     {
         run();
     }
-
+    chatRoom room_;
 private:
 
     void run()
@@ -249,7 +248,6 @@ private:
     boost::asio::io_service& io_service_;
     boost::asio::io_service::strand& strand_;
     tcp::acceptor acceptor_;
-    chatRoom room_;
 };
 
 //----------------------------------------------------------------------
