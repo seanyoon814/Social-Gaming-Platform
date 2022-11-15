@@ -3,7 +3,7 @@
 #include <thread>
 #include <iostream>
 #include <cstring>
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 #include <boost/asio.hpp>
 #include <chrono>
 #include "protocol.hpp"
@@ -12,6 +12,7 @@
 
 
 using boost::asio::ip::tcp;
+using namespace boost::placeholders;
 using namespace std;
 
 class client
@@ -106,15 +107,17 @@ private:
 };
 
 //----------------------------------------------------------------------
-void mainClient(std::string& roomNum)
+void mainClient(std::string& roomNum, uint8_t& playerNum)
 {
+    bool joinedRoom = false;
+    bool received = false;
     // Initialize socket.
     TCPSocket tcpSocket([](int errorCode, std::string errorMessage){
         cout << "Socket creation error:" << errorCode << " : " << errorMessage << endl;
     });
 
     // Start receiving from the host.
-    tcpSocket.onMessageReceived = [&roomNum](string message) {
+    tcpSocket.onMessageReceived = [&roomNum,&received](string message) {
         cout << "Message from the Server: " << message << endl;
         std::vector<std::string> strs;
         boost::split(strs, message.data(), boost::is_any_of("\t "));
@@ -123,7 +126,14 @@ void mainClient(std::string& roomNum)
                 std::istringstream num;
                 num.str(strs[1]+"\n");
                 std::getline(num, roomNum);
-                std::cout<<"Room created. Code: " << strs[1] <<std::endl;
+                std::cout<<"Room created. Code: " << strs[2] <<std::endl;
+            }else if(strcmp(strs[0].c_str(),"join")==0){
+                if(std::stoi(strs[1].c_str()) != -1){
+                    std::istringstream num;
+                    num.str(strs[1]+"\n");
+                    std::getline(num, roomNum);
+                }
+                received = true;
             }
         }
     };
@@ -161,10 +171,17 @@ void mainClient(std::string& roomNum)
                 //join room
                 tcpSocket.Send("join");
                 std::cout << "Enter room #:\n";
+                std::string joinCode;
                 while(true){
                     try{
-                        std::getline(std::cin, roomNum);
-                        if(std::stoi(roomNum) < 4000 || std::stoi(roomNum)>4010){
+                        std::getline(std::cin, joinCode);
+                        tcpSocket.Send(joinCode);
+                        while(!received){
+                            //wait for server to validate
+                            sleep(0.01);
+                        }
+                        received = false;
+                        if(roomNum.empty()){
                             //invalid room number/port
                             std::cerr << "Invalid room number, try again:\n";
                         }else{
@@ -190,8 +207,9 @@ void mainClient(std::string& roomNum)
 int main(int argc, char* argv[])
 {
     std::string roomNum;
+    uint8_t playerNum;
     bool validRoom = false;
-    std::thread main_thread(mainClient, std::ref(roomNum));
+    std::thread main_thread(mainClient, std::ref(roomNum), std::ref(playerNum));
     try
     {
         if (argc != 4)

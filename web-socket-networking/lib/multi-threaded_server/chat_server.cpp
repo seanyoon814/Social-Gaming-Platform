@@ -257,7 +257,7 @@ private:
     sent from the clients. A map is used to keep track of the unique room# codes assigned to each available port
 */
 std::mutex roomMutex;
-void createRoom(int &nextPort, std::unordered_map<std::string,std::string> &roomInfo)
+std::string createRoom(int &nextPort, std::unordered_map<std::string,std::string> &roomInfo)
 {
     //Uses mutex to update roomInfo map and increment port number for thread-safety
     std::lock_guard<std::mutex> guard(roomMutex);
@@ -269,16 +269,31 @@ void createRoom(int &nextPort, std::unordered_map<std::string,std::string> &room
     fflush(stdout);
     auto key = hashfunc(std::to_string(nextPort));
     roomInfo.insert({std::to_string(key),std::to_string(nextPort)});
+    return std::to_string(nextPort) + " " + std::to_string(key);
+}
+
+std::string validateRoom(std::string code,std::unordered_map<std::string,std::string> &roomInfo)
+{
+    std::lock_guard<std::mutex> guard(roomMutex);
+    if (auto search = roomInfo.find(code); search != roomInfo.end()){
+        std::cout<<"Found: "<<search->second<<std::endl;
+        fflush(stdout);
+        return search->second;
+    }
+    std::cout <<"Not found\n";
+    fflush(stdout);
+    return "-1";
 }
 
 int mainServer(){
     // Initialize server socket..
     TCPServer tcpServer;
 
-    // Game room variables
+    /*** Game room variables ***/
     // Map of room# to port#
     std::unordered_map<std::string,std::string> roomInfo;
     int nextPort = 3999;
+    std::vector<uint8_t> playerNums(10, 0);
 
     // When a new client connected:
     tcpServer.onNewConnection = [&](TCPSocket *newClient) {
@@ -288,12 +303,17 @@ int mainServer(){
         newClient->onMessageReceived = [newClient,&nextPort,&roomInfo](string message) {
             cout << newClient->remoteAddress() << ":" << newClient->remotePort() << " => " << message << endl;
             if(strcmp(message.data(),"join")==0){
-                //validate
+                //wait for next message that contains the code
+
             }else if(strcmp(message.data(),"create")==0){
                 //create new room
                 std::cout<< "Creating new room\n";
-                createRoom(nextPort,roomInfo);
-                newClient->Send("create "+std::to_string(nextPort));
+                auto k = createRoom(nextPort,roomInfo);
+                newClient->Send("create "+k);
+            }else{
+                std::cout<<"Validating...\n";
+                auto v = validateRoom(message.data(),roomInfo);
+                newClient->Send("join "+v);
             }
         };
 
