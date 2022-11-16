@@ -22,7 +22,19 @@ void LocalMessage::runRule()
         serv.get()->room_.broadcast(message, client);
     }
 }
-
+void LocalMessage::runRule(std::string &result)
+{
+    for(auto client : clients)
+    {
+        //TODO: Filter out clients using Client ID
+        //i.e.:
+        //if(client.get().ID == id)
+        // {
+        //     serv.get()->room_.broadcast(message, client);
+        // }
+        serv.get()->room_.broadcast(message, client);
+    }
+}
 void LocalMessage::changeMessage(std::array<char, MAX_IP_PACK_SIZE> msg)
 {
     message = msg;
