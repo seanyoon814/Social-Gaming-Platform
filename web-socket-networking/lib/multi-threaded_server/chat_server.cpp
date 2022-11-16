@@ -257,7 +257,7 @@ private:
     sent from the clients. A map is used to keep track of the unique room# codes assigned to each available port
 */
 std::mutex roomMutex;
-std::string createRoom(int &nextPort, std::unordered_map<std::string,std::string> &roomInfo)
+std::string createRoom(int &nextPort, std::unordered_map<std::string,std::string> &roomInfo,std::vector<uint8_t> &playerNums)
 {
     //Uses mutex to update roomInfo map and increment port number for thread-safety
     std::lock_guard<std::mutex> guard(roomMutex);
@@ -269,16 +269,17 @@ std::string createRoom(int &nextPort, std::unordered_map<std::string,std::string
     fflush(stdout);
     auto key = hashfunc(std::to_string(nextPort));
     roomInfo.insert({std::to_string(key),std::to_string(nextPort)});
+    //playerNums[nextPort-4000]++;
     return std::to_string(nextPort) + " " + std::to_string(key);
 }
 
-std::string validateRoom(std::string code,std::unordered_map<std::string,std::string> &roomInfo)
+std::string validateRoom(std::string code,std::unordered_map<std::string,std::string> &roomInfo,std::vector<uint8_t> &playerNums)
 {
     std::lock_guard<std::mutex> guard(roomMutex);
     if (auto search = roomInfo.find(code); search != roomInfo.end()){
         std::cout<<"Found: "<<search->second<<std::endl;
         fflush(stdout);
-        return search->second;
+        return search->second + " " + std::to_string(++playerNums[std::stoi(search->second)-4000]);
     }
     std::cout <<"Not found\n";
     fflush(stdout);
@@ -300,7 +301,7 @@ int mainServer(){
         cout << "New client: [";
         cout << newClient->remoteAddress() << ":" << newClient->remotePort() << "]" << endl;
 
-        newClient->onMessageReceived = [newClient,&nextPort,&roomInfo](string message) {
+        newClient->onMessageReceived = [newClient,&nextPort,&roomInfo,&playerNums](string message) {
             cout << newClient->remoteAddress() << ":" << newClient->remotePort() << " => " << message << endl;
             if(strcmp(message.data(),"join")==0){
                 //wait for next message that contains the code
@@ -308,11 +309,11 @@ int mainServer(){
             }else if(strcmp(message.data(),"create")==0){
                 //create new room
                 std::cout<< "Creating new room\n";
-                auto k = createRoom(nextPort,roomInfo);
+                auto k = createRoom(nextPort,roomInfo,playerNums);
                 newClient->Send("create "+k);
             }else{
                 std::cout<<"Validating...\n";
-                auto v = validateRoom(message.data(),roomInfo);
+                auto v = validateRoom(message.data(),roomInfo,playerNums);
                 newClient->Send("join "+v);
             }
         };

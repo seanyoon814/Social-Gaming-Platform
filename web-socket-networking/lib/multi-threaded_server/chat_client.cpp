@@ -117,7 +117,7 @@ void mainClient(std::string& roomNum, uint8_t& playerNum)
     });
 
     // Start receiving from the host.
-    tcpSocket.onMessageReceived = [&roomNum,&received](string message) {
+    tcpSocket.onMessageReceived = [&roomNum,&received,&playerNum](string message) {
         cout << "Message from the Server: " << message << endl;
         std::vector<std::string> strs;
         boost::split(strs, message.data(), boost::is_any_of("\t "));
@@ -129,6 +129,7 @@ void mainClient(std::string& roomNum, uint8_t& playerNum)
                 std::cout<<"Room created. Code: " << strs[2] <<std::endl;
             }else if(strcmp(strs[0].c_str(),"join")==0){
                 if(std::stoi(strs[1].c_str()) != -1){
+                    playerNum = std::stoi(strs[2].c_str());
                     std::istringstream num;
                     num.str(strs[1]+"\n");
                     std::getline(num, roomNum);
@@ -161,6 +162,7 @@ void mainClient(std::string& roomNum, uint8_t& playerNum)
                 std::cerr <<"Invalid input\n";
             }else if(std::stoi(selectedcommand) ==1){
                 //create new room
+                playerNum = 0;
                 tcpSocket.Send("create");
                 while(roomNum.empty()){
                     //wait for response
@@ -207,7 +209,7 @@ void mainClient(std::string& roomNum, uint8_t& playerNum)
 int main(int argc, char* argv[])
 {
     std::string roomNum;
-    uint8_t playerNum;
+    uint8_t playerNum=0;
     bool validRoom = false;
     std::thread main_thread(mainClient, std::ref(roomNum), std::ref(playerNum));
     try
@@ -227,6 +229,7 @@ int main(int argc, char* argv[])
                 continue;
             }
         }
+        std::cout <<"Your player ID is " << std::to_string(playerNum) << std::endl;
 
         boost::asio::io_service io_service;
         tcp::resolver resolver(io_service);
