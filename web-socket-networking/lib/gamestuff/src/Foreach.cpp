@@ -1,9 +1,10 @@
 #include "Foreach.h"
 #include <algorithm>
 
-Foreach::Foreach(std::vector<Rules *> ruleList)
+Foreach::Foreach(const std::vector<Rules *>& ruleList, const std::vector<Data*> list_)
 {
     rules = ruleList;
+    list = list_;
 }
 
 Foreach::~Foreach()

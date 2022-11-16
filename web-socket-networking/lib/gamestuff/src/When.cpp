@@ -2,9 +2,9 @@
 #include <algorithm>
 
 
-When::When(std::pair<bool, std::vector<Rules*>> rules_)
+When::When(std::vector<Cases> caseList_)
 {
-    rules = rules_;
+    caseList = caseList_;
 }
 
 When::~When()
@@ -13,12 +13,17 @@ When::~When()
 
 void When::runRule()
 {
-    //if rules.first.evalcond()?
-    if (rules.first)
+    for(auto cases: caseList)
     {
-        std::for_each(rules.second.begin(), rules.second.end(), [](auto rule) {
-            rule->runRule();
-        });
+        if (cases.condition->getValue())
+        {
+            for(auto rule: cases.rules)
+            {
+                rule->runRule();
+            }
+            break;
+        }
+        
     }
     
 }
