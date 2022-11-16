@@ -1,7 +1,7 @@
 #include "Foreach.h"
 #include <algorithm>
 
-Foreach::Foreach(const std::vector<Rules *>& ruleList, const std::vector<Data*> list_)
+Foreach::Foreach(const std::vector<Rules *>& ruleList, const ListObj& list_)
 {
     rules = ruleList;
     list = list_;
@@ -18,17 +18,11 @@ std::vector<Rules*> Foreach::getRules()
 
 void Foreach::runRule()
 {
-    //Eventually for each variable/list tp iterate over
-    /*
-    for(auto item:items)
+    std::for_each(list.getValue().begin(), list.getValue().end(), [](auto element)
     {
         std::for_each(rules.begin(), rules.end(), [](auto rule) {
             rule->runRule();
-        });
-    }
-    */
-    std::for_each(rules.begin(), rules.end(), [](auto rule) {
-        rule->runRule();
+        })
     });
 }
 
