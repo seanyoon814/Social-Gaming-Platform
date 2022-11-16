@@ -76,11 +76,17 @@ vector<Rules*> parseRules(json rules)
             }
         } else if (ruleName == "when")
         {
+            vector<Cases> caseList;
             for(auto cases: rule["cases"])
             {
-                cout << "condition: " << cases["condition"] << endl;
-                parseRules(cases["rules"]);
+                Cases newCase;
+                //Find a way to parse strings of the condition into some bool that can be checked by the when rule
+                newCase.condition = cases["condition"].dump();
+                newCase.rules = parseRules(cases["rules"]);
+                caseList.push_back(newCase);
             }
+            Rules* newRule = new When(caseList);
+            ruleList.push_back(newRule);
         } else if (ruleName == "extend")
         {
             cout << "target: " << rule["target"] << endl;
