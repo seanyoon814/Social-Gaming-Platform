@@ -17,7 +17,6 @@ using std::string;
 using std::vector;
 using std::ostream;
 using std::shared_ptr;
-using std::map;
 using std::vector;
 
 
@@ -31,14 +30,14 @@ public:
 };
 
 
-using dataVector = shared_ptr<vector<std::shared_ptr<Data>>>;
-using dataMap = shared_ptr<map<string, shared_ptr<Data>>>;
-using dataPtr = std::shared_ptr<Data>;
+using dataVector = VectorObj;
+using dataMap = MapObj;
 
 
 class ListExtend : virtual Rules {
 public:
     ListExtend(dataVector &target, dataVector& list);
+    ListExtend(dataVector &target, dataMap& list);
     ListExtend(dataMap &target, dataMap& list);
     void runRule() override;
 private:
@@ -74,7 +73,6 @@ public:
     ListSort(dataVector & vctr, string  key);
     void runRule() override;
 private:
-//    datMap* map = nullptr;
     dataVector* vctr = nullptr;
     bool hasKey = false;
     string key;
@@ -82,25 +80,20 @@ private:
 
 class ListDeal : virtual Rules {
 public:
-    ListDeal(dataVectorContainer& list, dataVectorContainer& to, int ct);
-    ListDeal(dataVector & datavctr, dataVector& to,int ct);
+    ListDeal(dataVector& list, dataVector& to, int ct);
     void runRule();
 private:
-    dataVectorContainer* list = nullptr;
     dataVector* datavctr = nullptr;
-    dataVectorContainer* toList = nullptr;
     dataVector* toDatavctr = nullptr;
     int count;
 };
 
 class ListDiscard : virtual Rules {
 public:
-    ListDiscard(dataVectorContainer& list,int ct);
-    ListDiscard(dataVector& datavctr, int ct);
+    ListDiscard(dataVector& list,int ct);
     void runRule();
 private:
-    dataVectorContainer* list = nullptr;
-    dataVector* datavctr = nullptr;
+    dataVector* list = nullptr;
     int count;
 };
 
@@ -109,46 +102,46 @@ private:
 
 
 
-////TODO: for deal and discard, how do you access the variable list if the parameter from and to is a "variable name"
+//////TODO: for deal and discard, how do you access the variable list if the parameter from and to is a "variable name"
+////
+//// from and to are both lists, so when the discard keyword is called we know that from and to will be lists.
+//// In the JSON file rules handler, we will call functions according to their respective names
+////
+////template <typename T>
+////class ListDeal : virtual Rules {
+////    ListDeal(const std::string& from, const std::string& to, const int& count, dataVectorContainer list);
+////    void runRule();
+////private:
+////    const string from;
+////    const string to;
+////    const int count;
+////    dataVectorContainer list;
+////};
+////
+////template <typename T>
+////class ListDiscard : virtual Rules {
+////    ListDiscard(const std::string& from, const int& count);
+////    void runRule();
+////private:
+////    const string from;
+////    const string to;
+////    const int count;
+////    dataVectorContainer list;
+////};
 //
-// from and to are both lists, so when the discard keyword is called we know that from and to will be lists. 
-// In the JSON file rules handler, we will call functions according to their respective names
 //
 //template <typename T>
-//class ListDeal : virtual Rules {
-//    ListDeal(const std::string& from, const std::string& to, const int& count, dataVectorContainer list);
-//    void runRule();
-//private:
-//    const string from;
-//    const string to;
-//    const int count;
-//    dataVectorContainer list;
-//};
+//ostream& operator<<(ostream& out, const vector<shared_ptr<T>>& vectors){
+//    for(const auto& vector : vectors){
+//        out << *vector  << std::endl;
+//    }
+//    return out;
+//}
 //
 //template <typename T>
-//class ListDiscard : virtual Rules {
-//    ListDiscard(const std::string& from, const int& count);
-//    void runRule();
-//private:
-//    const string from;
-//    const string to;
-//    const int count;
-//    dataVectorContainer list;
-//};
-
-
-template <typename T>
-ostream& operator<<(ostream& out, const vector<shared_ptr<T>>& vectors){
-    for(const auto& vector : vectors){
-        out << *vector  << std::endl;
-    }
-    return out;
-}
-
-template <typename T>
-ostream& operator<<(ostream& out, const vector<vector<shared_ptr<T>>> & vectors){
-for(const auto& vector : vectors){
-out << vector << std::endl;
-}
-return out;
-}
+//ostream& operator<<(ostream& out, const vector<vector<shared_ptr<T>>> & vectors){
+//for(const auto& vector : vectors){
+//out << vector << std::endl;
+//}
+//return out;
+//}

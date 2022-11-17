@@ -7,6 +7,7 @@
 #include <utility>
 #include <vector>
 #include <string>
+#include <iterator>
 
 #include "include/ListOps.h"
 #include <random>
@@ -20,106 +21,87 @@ using std::shared_ptr;
 
 ListExtend::ListExtend(dataVector &target, dataVector& list)
 {this->targetVector = &target; this->listVector = &list;}
-ListExtend::ListExtend(dataMap &target, dataMap& list)
-{this->targetMap = &target; this->listMap = &list;}
+
+ListExtend::ListExtend(dataMap &target, dataMap& map)
+{this->targetMap = &target; this->listMap = &map;}
 
 void ListExtend::runRule(){
     if(listVector && targetVector)
-        targetVector->get()->insert(
-                targetVector->get()->end(),
-                listVector->get()->begin(),
-                listVector->get()->end()
+        targetVector->value.insert(
+                targetVector->value.end(),
+                listVector->value.begin(),
+                listVector->value.end()
         );
-    else if(listMap && targetMap)targetMap->get()->insert(listMap->get()->begin(),listMap->get()->end());
+    else if(listMap && targetMap)targetMap->value.insert(listMap->value.begin(),listMap->value.end());
 }
 
 
 ListReverse::ListReverse(dataVector& list): list(&list) {}
-ListReverse::ListReverse(dataMap& map): map(&map) {}
 void ListReverse::runRule(){
-//    if(map)std::reverse(map->get()->begin(),map->get()->end());
-    if(list)std::reverse(list->get()->begin(), list->get()->end());
+    std::reverse(list->value.begin(), list->value.end());
 }
 
 
 ListShuffle::ListShuffle(dataVector & datavctr) :datavctr(&datavctr) {}
 void ListShuffle::runRule(){
 
-    if(datavctr)std::shuffle(datavctr->get()->begin(),datavctr->get()->end(),std::random_device());
+    if(datavctr)std::shuffle(datavctr->value.begin(),datavctr->value.end(),std::random_device());
 }
 
 
 ListSort::ListSort(dataVector & vctr):vctr(&vctr){};
-ListSort::ListSort(dataVector & vctr, string key):vctr(&vctr),key(std::move(key)),hasKey(false){};
+ListSort::ListSort(dataVector & vctr, string key):vctr(&vctr),key(std::move(key)),hasKey(true){};
 
-bool mapComparator(dataMap& map1, dataMap& map2, const string& key){
-    if(map1.get()->at(key) <= map2.get()->at(key)){
-        return true;
+struct mapComparator{
+    const string key;
+    explicit mapComparator(const string& newKey):key(newKey){};
+    bool operator()(const shared_ptr<Data>& map1,const shared_ptr<Data>& map2) const{
+        auto map1Ptr = (dataMap*)(map1.get());
+        auto map2Ptr = (dataMap*)(map1.get());
+        if(map1Ptr->value.at(key) <= map2Ptr->value.at(key)){
+            return true;
+        }
+        return false;
     }
-    return false;
-}
+
+};
 
 void ListSort::runRule(){
-  if(vctr && !hasKey)std::sort(vctr->get()->begin(),vctr->get()->end());
-  else if(vctr && hasKey){
-      const std::type_info& type = typeid(dataMap);
+  if(hasKey)std::sort(vctr->value.begin(),vctr->value.end(),
+[](const shared_ptr<Data>& data1,const shared_ptr<Data>& data2) -> bool{
+
+  });
+  else{
       bool allMap = true;
-      for(const auto& ele : *vctr->get()){
-          if(typeid(ele) != type){
+      for(const auto& ele : vctr->value){
+          if(typeid(ele) != typeid(dataMap)){
               allMap = false;
               std::cout<<"Not all elements are map!"<<std::endl;
           }
           if(allMap){
               const string sortKey = this->key;
-              std::sort(vctr->get()->begin(),
-                        vctr->get()->end(),
-                        [this](dataMap& map1, dataMap& map2){return mapComparator(map1,map2,key);});
+              std::sort(vctr->value.begin(),
+                        vctr->value.end(),
+                        mapComparator(key));
           }
       }
   }
 }
 
-ListDeal::ListDeal(dataVectorContainer& list, dataVectorContainer& to, int ct) :list(&list), toList(&to),count(ct) {runRule();}
-ListDeal::ListDeal(dataVector & datavctr, dataVector& to,int ct) :datavctr(&datavctr), toDatavctr(&to),count(ct) {runRule();}
 
+ListDeal::ListDeal(dataVector &list, dataVector &to, int ct):datavctr(&list),toDatavctr(&to) {}
 
 void ListDeal::runRule(){
-    if(list) {
-        //std::copy_n(list->begin(), count, toList->begin());
-        //toList->resize(count);
-        for(int i = 0; i < count; i ++) {
-            //toList->push_back(list[i]);
-        }
-    }
-    if(datavctr) {
-        //std::copy_n(list->begin(), count, toDatavctr->begin());
-        //toDatavctr->resize(count);
-        for(int i = 0; i < count; i ++) {
-            //toDatavctr->push_back(list[i]);
-        }
-    }
-    // if(list)std::copy_if(list->begin(), list->end(), toList, (count-- != 0));
-    // if(list)std::copy_if(list->begin(), list->end(), toDatavctr,(count-- != 0));
+    std::move(datavctr->value.begin(), datavctr->value.begin()+5, toDatavctr->value.end());
 }
 
+ListDiscard::ListDiscard(dataVector &list, int ct):list(&list),count(ct) {}
 
-ListDiscard::ListDiscard(dataVectorContainer& list, int ct) :list(&list), count(ct) {runRule();}
-ListDiscard::ListDiscard(dataVector & datavctr, int ct) :datavctr(&datavctr), count(ct) {runRule();}
-
-
-void ListDiscard::runRule(){
-
-    if(list) {
-        while(count != 0) {
-            list->pop_back();
-            count--;
-        }
+void ListDiscard::runRule() {
+    if(list->value.size() < count){
+        cout << "Number of elements requested to be removed is bigger than the container itself!"<<std::endl;
     }
-    if(datavctr) {
-        while(count != 0) {
-            datavctr->pop_back();
-            count--;
-        }
+    for (auto i = 0 ; i++; i < count){
+        list->value.pop_back();
     }
 }
-

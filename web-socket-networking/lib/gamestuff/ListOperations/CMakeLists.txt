@@ -9,7 +9,7 @@ target_sources(ListOperations
 )
 target_include_directories(ListOperations
         PUBLIC
-        /include)
+        include)
 
 set_target_properties(ListOperations PROPERTIES
         LINKER_LANGUAGE CXX

@@ -1,16 +1,20 @@
-#include <map>
 #include <string>
 #include <ostream>
 #include <list>
+#include <vector>
+#include <unordered_map>
+
 using std::string;
 using std::shared_ptr;
-using std::map;
+using std::unordered_map;
 // Data
 class Data
 {
 public:
-    virtual std::ostream &output(std::ostream &out) const;
-    friend std::ostream &operator<<(std::ostream &out, Data const &data);
+    virtual void* getValue() = 0;
+//    virtual std::ostream &output(std::ostream &out) const;
+//    friend std::ostream &operator<<(std::ostream &out, Data const &data);
+private:
 };
 
 // String
@@ -19,7 +23,7 @@ class StringObj : public Data
 public:
     StringObj(const std::string &value);
     std::string getValue() const;
-    std::ostream &output(std::ostream &out) const override;
+//    std::ostream &output(std::ostream &out) const override;
     //     bool comparator()
 private:
     std::string value;
@@ -65,20 +69,22 @@ private:
 class MapObj : public Data
 {
 public:
-    MapObj(map<string, shared_ptr<Data>> value);
-    map<string, shared_ptr<Data>> getValue() const;
+    MapObj() = default;
+    MapObj(unordered_map<string, shared_ptr<Data>> value);
+    unordered_map<string, shared_ptr<Data>> getValue() const;
 
-private:
-    map<string, shared_ptr<Data>> value;
+//private:
+    unordered_map<string, shared_ptr<Data>> value;
 };
 
 // List
-class ListObj : public Data
+class VectorObj : public Data
 {
 public:
-    ListObj(const std::list<Data> &value);
-    std::list<Data> getValue() const;
+    VectorObj() = default;
+    VectorObj(std::vector<shared_ptr<Data>> value);
+    std::vector<shared_ptr<Data>> getValue() const;
 
-private:
-    std::list<Data> value;
+//private:
+    std::vector<shared_ptr<Data>> value;
 };

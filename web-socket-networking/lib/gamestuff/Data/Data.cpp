@@ -5,13 +5,13 @@
 #include <unordered_map>
 #include "Data.h"
 
-// Data
-std::ostream &operator<<(std::ostream &out, const Data &data)
-{
-    return data.output(out);
-}
-
-// String
+//// Data
+//std::ostream &operator<<(std::ostream &out, const Data &data)
+//{
+//    return data.output(out);
+//}
+//
+//// String
 StringObj::StringObj(const std::string &value) : value(value) {}
 
 std::string StringObj::getValue() const
@@ -19,10 +19,10 @@ std::string StringObj::getValue() const
     return value;
 }
 
-std::ostream &StringObj::output(std::ostream &out) const
-{
-    return Data::output(out) << "\tValue: " << getValue() << "], ";
-}
+//std::ostream &StringObj::output(std::ostream &out) const
+//{
+//    return Data::output(out) << "\tValue: " << getValue() << "], ";
+//}
 
 // Integer
 IntObj::IntObj(const int &value) : value(value) {}
@@ -64,7 +64,7 @@ bool BoolObj::getValue() const
 // }
 
 // Map
-MapObj::MapObj(unordered_map<string, shared_ptr<Data>> value) : value(std::move(value)) {}
+MapObj::MapObj(std::unordered_map<string, shared_ptr<Data>> value) : value(std::move(value)) {}
 
 unordered_map<string, shared_ptr<Data>> MapObj::getValue() const
 {
@@ -72,9 +72,9 @@ unordered_map<string, shared_ptr<Data>> MapObj::getValue() const
 }
 
 // List
-ListObj::ListObj(const std::list<Data> &value) : value(value) {}
+VectorObj::VectorObj(std::vector<shared_ptr<Data>> value) : value(value) {}
 
-std::list<Data> ListObj::getValue() const
+std::vector<shared_ptr<Data>> VectorObj::getValue() const
 {
     return value;
 }
