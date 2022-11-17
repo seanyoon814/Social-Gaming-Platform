@@ -10,41 +10,18 @@
 #include <memory>
 #include <vector>
 #include <string>
+#include <unordered_map>
+#include "Data.h"
 
 using std::string;
 using std::vector;
 using std::ostream;
 using std::shared_ptr;
+using std::vector;
 
 
 
-class Data{
-public:
-    explicit Data(const std::string& name);
-    std::string getName() const;
-    virtual ostream& output(ostream& out) const;
-    friend std::ostream& operator<<(std::ostream& out, Data const& data);
-private:
-    std::string name;
-};
 
-class StringObj : public Data{
-public:
-    StringObj(const std::string& name, const std::string&  value);
-    string getValue() const;
-    ostream& output(ostream& out) const override;
-//     bool comparator()
-private:
-    std::string value;
-};
-
-class IntObj : public Data{
-public:
-    IntObj(const std::string& name, const int&  value);
-
-private:
-    int value;
-};
 
 
 class Rules{
@@ -53,76 +30,70 @@ public:
 };
 
 
-using dataVector = std::vector<std::shared_ptr<Data>>;
-using vectorsData = std::vector<dataVector>;
+using dataVector = VectorObj;
+using dataMap = MapObj;
+
 
 class ListExtend : virtual Rules {
 public:
-    ListExtend(vectorsData& target, const dataVector& list);
+    ListExtend(dataVector &target, dataVector& list);
+    ListExtend(dataVector &target, dataMap& list);
+    ListExtend(dataMap &target, dataMap& list);
     void runRule() override;
 private:
-    dataVector list;
-    vectorsData* target = nullptr;
+    dataVector* listVector = nullptr;
+    dataVector* targetVector = nullptr;
+    dataMap * listMap = nullptr;
+    dataMap* targetMap = nullptr;
 };
 
 class ListReverse : virtual Rules {
 public:
-    ListReverse(vectorsData& list);
-    ListReverse(dataVector& dataVector);
+    ListReverse(dataVector& list);
+    ListReverse(dataMap& map);
 
     void runRule() override;
 private:
-    vectorsData* list = nullptr;
-    dataVector* datavctr = nullptr;
+    dataVector* list = nullptr;
+    dataMap* map = nullptr;
 };
 
 class ListShuffle : virtual Rules {
 public:
-    ListShuffle(vectorsData& list);
     ListShuffle(dataVector& datavctr);
-    void runRule();
+    void runRule() override;
 private:
-    vectorsData* list = nullptr;
     dataVector* datavctr = nullptr;
 };
 
 
-//template <typename T>
 class ListSort : virtual Rules {
 public:
-    ListSort(vectorsData& list);
-    ListSort(dataVector & datavctr);
-    // ListSort<T>(vectorsData& list, T key);
-    // ListSort<T>(dataVector & datavctr, T key);
-    void runRule();
+    ListSort(dataVector & vctr);
+    ListSort(dataVector & vctr, string  key);
+    void runRule() override;
 private:
-    vectorsData* list = nullptr;
-    dataVector* datavctr = nullptr;
+    dataVector* vctr = nullptr;
     bool hasKey = false;
-    //T key;
+    string key;
 };
 
 class ListDeal : virtual Rules {
 public:
-    ListDeal(vectorsData& list, vectorsData& to, int ct);
-    ListDeal(dataVector & datavctr, dataVector& to,int ct);
+    ListDeal(dataVector& list, dataVector& to, int ct);
     void runRule();
 private:
-    vectorsData* list = nullptr;
     dataVector* datavctr = nullptr;
-    vectorsData* toList = nullptr;
     dataVector* toDatavctr = nullptr;
     int count;
 };
 
 class ListDiscard : virtual Rules {
 public:
-    ListDiscard(vectorsData& list,int ct);
-    ListDiscard(dataVector& datavctr, int ct);
+    ListDiscard(dataVector& list,int ct);
     void runRule();
 private:
-    vectorsData* list = nullptr;
-    dataVector* datavctr = nullptr;
+    dataVector* list = nullptr;
     int count;
 };
 
@@ -131,46 +102,46 @@ private:
 
 
 
-////TODO: for deal and discard, how do you access the variable list if the parameter from and to is a "variable name"
+//////TODO: for deal and discard, how do you access the variable list if the parameter from and to is a "variable name"
+////
+//// from and to are both lists, so when the discard keyword is called we know that from and to will be lists.
+//// In the JSON file rules handler, we will call functions according to their respective names
+////
+////template <typename T>
+////class ListDeal : virtual Rules {
+////    ListDeal(const std::string& from, const std::string& to, const int& count, dataVectorContainer list);
+////    void runRule();
+////private:
+////    const string from;
+////    const string to;
+////    const int count;
+////    dataVectorContainer list;
+////};
+////
+////template <typename T>
+////class ListDiscard : virtual Rules {
+////    ListDiscard(const std::string& from, const int& count);
+////    void runRule();
+////private:
+////    const string from;
+////    const string to;
+////    const int count;
+////    dataVectorContainer list;
+////};
 //
-// from and to are both lists, so when the discard keyword is called we know that from and to will be lists. 
-// In the JSON file rules handler, we will call functions according to their respective names
 //
 //template <typename T>
-//class ListDeal : virtual Rules {
-//    ListDeal(const std::string& from, const std::string& to, const int& count, vectorsData list);
-//    void runRule();
-//private:
-//    const string from;
-//    const string to;
-//    const int count;
-//    vectorsData list;
-//};
+//ostream& operator<<(ostream& out, const vector<shared_ptr<T>>& vectors){
+//    for(const auto& vector : vectors){
+//        out << *vector  << std::endl;
+//    }
+//    return out;
+//}
 //
 //template <typename T>
-//class ListDiscard : virtual Rules {
-//    ListDiscard(const std::string& from, const int& count);
-//    void runRule();
-//private:
-//    const string from;
-//    const string to;
-//    const int count;
-//    vectorsData list;
-//};
-
-
-template <typename T>
-ostream& operator<<(ostream& out, const vector<shared_ptr<T>>& vectors){
-    for(const auto& vector : vectors){
-        out << *vector  << std::endl;
-    }
-    return out;
-}
-
-template <typename T>
-ostream& operator<<(ostream& out, const vector<vector<shared_ptr<T>>> & vectors){
-for(const auto& vector : vectors){
-out << vector << std::endl;
-}
-return out;
-}
+//ostream& operator<<(ostream& out, const vector<vector<shared_ptr<T>>> & vectors){
+//for(const auto& vector : vectors){
+//out << vector << std::endl;
+//}
+//return out;
+//}
