@@ -1,36 +1,51 @@
 #include "InputText.h"
 
-InputText::InputText(shared_ptr<server> &server, shared_ptr<participant> &callingClients, shared_ptr<participant> &participant, std::array<char, MAX_IP_PACK_SIZE> msg)
+InputText::InputText(shared_ptr<server> &server, shared_ptr<client> &callingClients, shared_ptr<client> &participant, std::array<char, MAX_IP_PACK_SIZE> msg)
 {
     serv = server;
-    client = participant;
+    to = participant;
     prompt = msg;
-    callingClient = callingClients;
+    from = callingClients;
 }
-InputText::InputText(shared_ptr<server> &server, shared_ptr<participant> &callingClients, shared_ptr<participant> &participant, std::array<char, MAX_IP_PACK_SIZE> msg, double tm)
+InputText::InputText(shared_ptr<server> &server, shared_ptr<client> &callingClients, shared_ptr<client> &participant, std::array<char, MAX_IP_PACK_SIZE> msg, double tm)
 {
     serv = server;
-    client = participant;
+    to = participant;
     prompt = msg;
-    callingClient = callingClients;
+    from = callingClients;
     timeout = tm;
 }
 std::string InputText::getResult()
 {
     return result.data();
 }
+void InputText::getAnswer()
+{
+    std::vector<shared_ptr<client>> v;
+    v.push_back(from);
+    std::array<char, MAX_IP_PACK_SIZE> ans;
+    std::cin >> ans.data();
+    std::unique_ptr<LocalMessage> l (new LocalMessage(ans, v, serv));
+    l.get()->runRule(from.get()->getPlayerID());
+    result = ans.data();
+}
 void InputText::runRule()
 {
-    std::vector<shared_ptr<participant>> v;
-    v.push_back(client);
+    std::vector<shared_ptr<client>> v;
+    v.push_back(to);
     if(timeout!=-1.0)
     {
         //first send the prompt
         std::unique_ptr<LocalMessage> l (new LocalMessage(prompt, v, serv));
-        l.get()->runRule();
+        l.get()->runRule(to.get()->getPlayerID());
         //afterwards, wait a certain amount of time   
-        std::chrono::seconds timeout(timeout);
-        // std::future<std::string> future = std::async(getAnswer);
+        thread getInput(getAnswer);
+        this_thread::sleep_for(std::chrono::seconds((int)timeout));
+        if(!result.empty())
+        {
+            //user put new input here
+            return;
+        }
     }
     else
     {

@@ -19,8 +19,9 @@ class client
 public:
     client(const std::array<char, MAX_NICKNAME>& nickname,
             boost::asio::io_service& io_service,
-            tcp::resolver::iterator endpoint_iterator) :
+            tcp::resolver::iterator endpoint_iterator, uint8_t id) :
             io_service_(io_service), socket_(io_service)
+            
     {
 
         strcpy(nickname_.data(), nickname.data());
@@ -38,6 +39,10 @@ public:
         io_service_.post(boost::bind(&client::closeImpl, this));
     }
 
+    uint8_t getPlayerID()
+    {
+        return playerID;
+    }
 private:
 
     void onConnect(const boost::system::error_code& error)
@@ -103,6 +108,7 @@ private:
     std::array<char, MAX_IP_PACK_SIZE> read_msg_;
     std::deque<std::array<char, MAX_IP_PACK_SIZE>> write_msgs_;
     std::array<char, MAX_NICKNAME> nickname_;
+    uint8_t playerID;
 };
 
 //----------------------------------------------------------------------
@@ -243,7 +249,7 @@ int main(int argc, char* argv[])
         std::array<char, MAX_NICKNAME> nickname;
         strcpy(nickname.data(), argv[1]);
 
-        client cli(nickname, io_service, iterator);
+        client cli(nickname, io_service, iterator, playerNum);
 
         std::thread t(boost::bind(&boost::asio::io_service::run, &io_service));
         std::array<char, MAX_IP_PACK_SIZE> msg;

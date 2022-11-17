@@ -1,11 +1,11 @@
 #include "LocalMessages.h"
-LocalMessage::LocalMessage(std::array<char, MAX_IP_PACK_SIZE> &msg, std::vector<std::shared_ptr<participant>> &client, std::shared_ptr<server> &s)
+LocalMessage::LocalMessage(std::array<char, MAX_IP_PACK_SIZE> &msg, std::vector<std::shared_ptr<client>> &client, std::shared_ptr<server> &s)
 {
     message = msg;
     clients = client;
     serv = s;
 }
-void LocalMessage::addClient(std::shared_ptr<participant> &p)
+void LocalMessage::addClient(std::shared_ptr<client> &p)
 {
     clients.push_back(p);
 }
@@ -13,26 +13,17 @@ void LocalMessage::runRule()
 {
     for(auto client : clients)
     {
-        //TODO: Filter out clients using Client ID
-        //i.e.:
-        //if(client.get().ID == id)
-        // {
-        //     serv.get()->room_.broadcast(message, client);
-        // }
-        serv.get()->room_.broadcast(message, client);
+        client.get()->write(message);
     }
 }
-void LocalMessage::runRule(std::string &result)
+void LocalMessage::runRule(uint8_t id)
 {
     for(auto client : clients)
     {
-        //TODO: Filter out clients using Client ID
-        //i.e.:
-        //if(client.get().ID == id)
-        // {
-        //     serv.get()->room_.broadcast(message, client);
-        // }
-        serv.get()->room_.broadcast(message, client);
+        if(id == client.get()->getPlayerID())
+        {
+            client.get()->write(message);
+        }
     }
 }
 void LocalMessage::changeMessage(std::array<char, MAX_IP_PACK_SIZE> msg)
