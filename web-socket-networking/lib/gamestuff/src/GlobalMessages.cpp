@@ -1,23 +1,21 @@
 #include "GlobalMessages.h"
-GlobalMessage::GlobalMessage(std::array<char, MAX_IP_PACK_SIZE> &msg, std::vector<std::shared_ptr<client>> &client, std::shared_ptr<server> &s)
+GlobalMessage::GlobalMessage(std::string msg, std::string name, std::shared_ptr<server> s)
 {
-    message = msg;
-    clients = client;
+    memset(message.data(), '\0', message.size());
+    strcpy(message.data(), msg.c_str());
+    client = findCallingParticipant(name);
     serv = s;
 }
-void GlobalMessage::addClient(std::shared_ptr<client> &p)
+std::shared_ptr<participant> GlobalMessage::findCallingParticipant(std::string name)
 {
-    clients.push_back(p);
+    return serv.get()->room_.name_table_reverse[name];
 }
 void GlobalMessage::runRule()
 {
-    for(auto client : clients)
-    {
-        //is broadcast the correct way to send a message to clients?
-        client.get()->write(message);
-    }
+    serv.get()->room_.broadcast(message, client);
 }
-void GlobalMessage::changeMessage(std::array<char, MAX_IP_PACK_SIZE> msg)
+void GlobalMessage::changeMessage(std::string msg)
 {
-    message = msg;
+    memset(message.data(), '\0', message.size());
+    strcpy(message.data(), msg.c_str());
 }

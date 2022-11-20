@@ -79,6 +79,7 @@ public:
     {
         participants_.insert(participant);
         name_table_[participant] = nickname;
+        name_table_reverse[nickname] = participant;
         std::for_each(recent_msgs_.begin(), recent_msgs_.end(),
                       boost::bind(&participant::onMessage, participant, _1));
     }
@@ -109,12 +110,37 @@ public:
         std::for_each(participants_.begin(), participants_.end(),
                       boost::bind(&participant::onMessage, _1, std::ref(formatted_msg)));
     }
+    void broadcast(std::array<char, MAX_IP_PACK_SIZE>& msg, std::shared_ptr<participant> participant, uint8_t id)
+    {
+        std::string timestamp = getTimestamp();
+        std::string nickname = getNickname(participant);
+        std::array<char, MAX_IP_PACK_SIZE> formatted_msg;
+        stringstream ss;
+        ss << id;
+        strcpy(formatted_msg.data(), ss.str().c_str());
+        // boundary correctness is guarded by protocol.hpp
+        strcpy(formatted_msg.data(), timestamp.c_str());
+        strcat(formatted_msg.data(), nickname.c_str());
+        strcat(formatted_msg.data(), msg.data());
+
+        recent_msgs_.push_back(formatted_msg);
+        while (recent_msgs_.size() > max_recent_msgs)
+        {
+            recent_msgs_.pop_front();
+        }
+        for(auto p : participants_)
+        {
+            boost::bind(&participant::onMessage, _1, std::ref(formatted_msg));
+        }
+    }
 
     std::string getNickname(std::shared_ptr<participant> participant)
     {
         return name_table_[participant];
     }
     std::unordered_set<std::shared_ptr<participant>> participants_;
+    //to get the participant in local/global messages
+    std::unordered_map<std::string, std::shared_ptr<participant>> name_table_reverse;
 private:
     enum { max_recent_msgs = 100 };
     std::unordered_map<std::shared_ptr<participant>, std::string> name_table_;
@@ -227,6 +253,7 @@ public:
         run();
     }
     chatRoom room_;
+
 private:
 
     void run()
@@ -309,6 +336,7 @@ int mainServer(){
                 std::cout<< "Creating new room\n";
                 auto k = createRoom(nextPort,roomInfo,playerNums);
                 newClient->Send("create "+k);
+                sleep(INT_MAX);
             }else{
                 std::cout<<"Validating...\n";
                 auto v = validateRoom(message.data(),roomInfo,playerNums);
@@ -316,7 +344,7 @@ int mainServer(){
             }
         };
 
-
+        //
         newClient->onSocketClosed = [newClient](int errorCode) {
             cout << "Socket closed:" << newClient->remoteAddress() << ":" << newClient->remotePort() << " -> " << errorCode << endl;
             cout << flush;
@@ -337,7 +365,7 @@ int mainServer(){
 
     string input;
     getline(cin, input);
-    while (input != "exit")
+    while (input != "exit\n")
     {
         getline(cin, input);
     }
@@ -359,7 +387,6 @@ int main(int argc, char* argv[])
             std::cerr << "Usage: chat_server <port> [<port> ...]\n";
             return 1;
         }
-
         std::shared_ptr<boost::asio::io_service> io_service(new boost::asio::io_service);
         boost::shared_ptr<boost::asio::io_service::work> work(new boost::asio::io_service::work(*io_service));
         boost::shared_ptr<boost::asio::io_service::strand> strand(new boost::asio::io_service::strand(*io_service));
@@ -367,28 +394,25 @@ int main(int argc, char* argv[])
         std::cout << "[" << std::this_thread::get_id() << "]" << "server starts" << std::endl;
 
         std::list < std::shared_ptr < server >> servers;
-        tcp::endpoint endpoint(tcp::v4(), std::atoi("4000"));
-        std::shared_ptr<server> a_server(new server(*io_service, *strand, endpoint));
-        servers.push_back(a_server);
-        // for (int i = 1; i < argc; ++i)
-        // {
-        //     tcp::endpoint endpoint(tcp::v4(), std::atoi(argv[i]));
-        //     std::shared_ptr<server> a_server(new server(*io_service, *strand, endpoint));
-        //     servers.push_back(a_server);
-        // }
+        for (int i = 1; i < argc; ++i)
+        {
+            tcp::endpoint endpoint(tcp::v4(), std::atoi(argv[i]));
+            std::shared_ptr<server> a_server(new server(*io_service, *strand, endpoint));
+            servers.push_back(a_server);
+        }
 
         boost::thread_group workers;
         for (int i = 0; i < 1; ++i)
         {
             boost::thread * t = new boost::thread{ boost::bind(&workerThread::run, io_service) };
 
-            #ifdef __linux__
+#ifdef __linux__
             // bind cpu affinity for worker thread in linux
             cpu_set_t cpuset;
             CPU_ZERO(&cpuset);
             CPU_SET(i, &cpuset);
             pthread_setaffinity_np(t->native_handle(), sizeof(cpu_set_t), &cpuset);
-            #endif
+#endif
             workers.add_thread(t);
         }
 

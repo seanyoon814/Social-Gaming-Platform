@@ -1,32 +1,44 @@
 #include "LocalMessages.h"
-LocalMessage::LocalMessage(std::array<char, MAX_IP_PACK_SIZE> &msg, std::vector<std::shared_ptr<client>> &client, std::shared_ptr<server> &s)
+LocalMessage::LocalMessage(std::string msg, std::shared_ptr<participant> p, uint8_t id, std::shared_ptr<server> s)
 {
-    message = msg;
-    clients = client;
+    memset(message.data(), '\0', message.size());
+    strcpy(message.data(), msg.c_str());
+    idVector.push_back(id);
     serv = s;
+    this->client = p;
 }
-void LocalMessage::addClient(std::shared_ptr<client> &p)
+LocalMessage::LocalMessage(std::string msg, std::shared_ptr<participant> p, std::vector<uint8_t> id, std::shared_ptr<server> s)
 {
-    clients.push_back(p);
+    memset(message.data(), '\0', message.size());
+    strcpy(message.data(), msg.c_str());
+    idVector = id;
+    serv = s;
+    this->client = p;
 }
+std::shared_ptr<participant> LocalMessage::findCallingParticipant(std::string name)
+{
+    return serv.get()->room_.name_table_reverse[name];
+}
+void LocalMessage::addParticipants(uint8_t newID)
+{
+    idVector.push_back(newID);
+}
+//Run to ALL clients (basically a global message)
 void LocalMessage::runRule()
 {
-    for(auto client : clients)
-    {
-        client.get()->write(message);
-    }
+    serv.get()->room_.broadcast(message, client);
 }
+//Run to SPECIFIC CLIENT IDs
 void LocalMessage::runRule(uint8_t id)
 {
-    for(auto client : clients)
+    for(auto iden : idVector)
     {
-        if(id == client.get()->getPlayerID())
-        {
-            client.get()->write(message);
-        }
+        //run the overloaded broadcast method
+        serv.get()->room_.broadcast(message, client, iden);
     }
 }
-void LocalMessage::changeMessage(std::array<char, MAX_IP_PACK_SIZE> msg)
+void LocalMessage::changeMessage(std::string msg)
 {
-    message = msg;
+    memset(message.data(), '\0', message.size());
+    strcpy(message.data(), msg.c_str());
 }

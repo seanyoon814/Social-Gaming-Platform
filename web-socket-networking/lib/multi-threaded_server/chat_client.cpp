@@ -10,6 +10,7 @@
 #include <boost/algorithm/string.hpp>
 #include "include/tcpsocket.hpp"
 
+
 using boost::asio::ip::tcp;
 using namespace boost::placeholders;
 using namespace std;
@@ -18,10 +19,10 @@ class client
 {
 public:
     client(const std::array<char, MAX_NICKNAME>& nickname,
-            boost::asio::io_service& io_service,
-            tcp::resolver::iterator endpoint_iterator, uint8_t id) :
+            boost::asio::io_service& io_service, 
+            uint8_t playerID,
+            tcp::resolver::iterator endpoint_iterator) :
             io_service_(io_service), socket_(io_service)
-            
     {
 
         strcpy(nickname_.data(), nickname.data());
@@ -38,10 +39,9 @@ public:
     {
         io_service_.post(boost::bind(&client::closeImpl, this));
     }
-
-    uint8_t getPlayerID()
+    void setID(uint8_t id)
     {
-        return playerID;
+        playerNum = id;
     }
 private:
 
@@ -57,15 +57,49 @@ private:
 
     void readHandler(const boost::system::error_code& error)
     {
-        std::cout << read_msg_.data() << std::endl;
-        if (!error)
+        //check to see if its a direct message (LocalMessage), or regular message (global)
+        std::string str = read_msg_.data();
+        //global (default) message
+        if(str[0] == '[' || str.empty())
         {
-            boost::asio::async_read(socket_,
-                                    boost::asio::buffer(read_msg_, read_msg_.size()),
-                                    boost::bind(&client::readHandler, this, _1));
-        } else
+            if(!error)
+            {
+                std::cout << read_msg_.data() << std::endl;
+                boost::asio::async_read(socket_,
+                                        boost::asio::buffer(read_msg_, read_msg_.size()),
+                                        boost::bind(&client::readHandler, this, _1));
+            }
+            else
+            {
+                closeImpl();
+            }
+        }
+        //has code
+        else
         {
-            closeImpl();
+            std::stringstream ss;
+            for(auto &ch : str)
+            {
+                if(ch == '[')
+                {
+                    break;
+                }
+                // std::cout << "letter 1:"<< ch << std::endl;
+                ss << ch;
+            }
+            // std::cout << "CODE:" << ss.str();
+            auto s = stoi(ss.str());
+            if(playerNum == s && !error)
+            {
+                std::cout << read_msg_.data() << std::endl;
+                boost::asio::async_read(socket_,
+                                        boost::asio::buffer(read_msg_, read_msg_.size()),
+                                        boost::bind(&client::readHandler, this, _1));
+            }
+            else
+            {
+                closeImpl();
+            }
         }
     }
 
@@ -102,13 +136,12 @@ private:
     {
         socket_.close();
     }
-
+    uint8_t playerNum;
     boost::asio::io_service& io_service_;
     tcp::socket socket_;
     std::array<char, MAX_IP_PACK_SIZE> read_msg_;
     std::deque<std::array<char, MAX_IP_PACK_SIZE>> write_msgs_;
     std::array<char, MAX_NICKNAME> nickname_;
-    uint8_t playerID;
 };
 
 //----------------------------------------------------------------------
@@ -157,13 +190,7 @@ void mainClient(std::string& roomNum, uint8_t& playerNum)
         // CONNECTION FAILED
         cout << errorCode << " : " << errorMessage << endl;
     });
-    // // tcpSocket.Send("create");
-    // while(true)
-    // {
-    //     std::cout << "Welcome to the main lobby!";
-    //     std::string text;
-    //     std::getline(std::cin, text);
-    // }
+
     std::string selectedcommand;
     std::cout << "1.Create\n2.Join\n";
     while(true){
@@ -225,7 +252,7 @@ int main(int argc, char* argv[])
     std::thread main_thread(mainClient, std::ref(roomNum), std::ref(playerNum));
     try
     {
-        if (argc != 3)
+        if (argc != 4)
         {
             std::cerr << "Usage: chat_client <nickname> <host> <port>\n";
             return 1;
@@ -249,8 +276,8 @@ int main(int argc, char* argv[])
         std::array<char, MAX_NICKNAME> nickname;
         strcpy(nickname.data(), argv[1]);
 
-        client cli(nickname, io_service, iterator, playerNum);
-
+        client cli(nickname, io_service, playerNum, iterator);
+        cli.setID(playerNum);
         std::thread t(boost::bind(&boost::asio::io_service::run, &io_service));
         std::array<char, MAX_IP_PACK_SIZE> msg;
 
@@ -261,9 +288,16 @@ int main(int argc, char* argv[])
             {
                 std::cin.clear(); //clean up error bit and try to finish reading
             }
-            if(strcmp (msg.data(),"/create") == 0){
-                std::cout << "HELLO";                
-            }else{
+            if(strcmp (msg.data(),"create") == 0){
+                // not in use currently
+                // cli.close();
+                // t.detach();  
+            }
+            else if(strcmp (msg.data(),"local") == 0)       
+            {
+                
+            }     
+            else{
                 cli.write(msg);
             }            
         }

@@ -4,12 +4,12 @@
 
 class GlobalMessage : public Rules{
     public:
-        GlobalMessage(std::array<char, MAX_IP_PACK_SIZE> &msg, std::vector<std::shared_ptr<client>> &client, std::shared_ptr<server> &s);
-        void changeMessage(std::array<char, MAX_IP_PACK_SIZE> msg);
+        GlobalMessage(std::string msg, std::string name,  std::shared_ptr<server> s);
+        void changeMessage(std::string msg);
         void runRule();
-        void addClient(std::shared_ptr<client> &p);
+        std::shared_ptr<participant> findCallingParticipant(std::string name);
     private:
-        std::vector<std::shared_ptr<client>> clients;
+        std::shared_ptr<participant> client;
         std::array<char, MAX_IP_PACK_SIZE> message;
         std::shared_ptr<server> serv;
 };
