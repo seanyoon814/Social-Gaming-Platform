@@ -12,7 +12,7 @@ std::shared_ptr<participant> GlobalMessage::findCallingParticipant(std::string n
 }
 void GlobalMessage::runRule()
 {
-    serv.get()->room_.broadcast(message, client);
+    serv.get()->room_.broadcast(message);
 }
 void GlobalMessage::changeMessage(std::string msg)
 {

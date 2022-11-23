@@ -59,23 +59,7 @@ private:
     {
         //check to see if its a direct message (LocalMessage), or regular message (global)
         std::string str = read_msg_.data();
-        //global (default) message
-        if(str[0] == '[' || str.empty())
-        {
-            if(!error)
-            {
-                std::cout << read_msg_.data() << std::endl;
-                boost::asio::async_read(socket_,
-                                        boost::asio::buffer(read_msg_, read_msg_.size()),
-                                        boost::bind(&client::readHandler, this, _1));
-            }
-            else
-            {
-                closeImpl();
-            }
-        }
-        //has code
-        else
+        if(str[0] != '[' && !str.empty())
         {
             std::stringstream ss;
             for(auto &ch : str)
@@ -84,22 +68,27 @@ private:
                 {
                     break;
                 }
-                // std::cout << "letter 1:"<< ch << std::endl;
                 ss << ch;
             }
-            // std::cout << "CODE:" << ss.str();
             auto s = stoi(ss.str());
-            if(playerNum == s && !error)
+            if(playerNum == s)
             {
                 std::cout << read_msg_.data() << std::endl;
-                boost::asio::async_read(socket_,
-                                        boost::asio::buffer(read_msg_, read_msg_.size()),
-                                        boost::bind(&client::readHandler, this, _1));
             }
-            else
-            {
-                closeImpl();
-            }
+        }
+        else
+        {
+            std::cout << read_msg_.data() << std::endl;
+        }
+        if(!error)
+        {
+            boost::asio::async_read(socket_,
+                                    boost::asio::buffer(read_msg_, read_msg_.size()),
+                                    boost::bind(&client::readHandler, this, _1));
+        }
+        else
+        {
+            closeImpl();
         }
     }
 

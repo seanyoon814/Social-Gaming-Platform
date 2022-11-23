@@ -7,10 +7,10 @@ class Rules{
         Rules(void) {};
         ~Rules(void) {};
 
-        std::string ruleSetOperation(std::string rule, T info);
+        std::string ruleSetOperation(std::string rule, std::string info);
         //A couple of rule setters
-        void setRuleOnList(RulesType ruleT, std::string rule);
-        void setTimerRule(RulesType ruleT,int duration, std::string mode )
-        void setMessageRule(RulesType ruleT,std::string message);
-        void setGlobalMessageRule(RulesType ruleT,std::string message);
+        void setRuleOnList(std::string rule);
+        void setTimerRule(int duration, std::string mode );
+        void setMessageRule(std::string message);
+        void setGlobalMessageRule(std::string message);
 };
