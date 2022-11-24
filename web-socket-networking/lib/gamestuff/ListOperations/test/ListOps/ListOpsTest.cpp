@@ -62,6 +62,6 @@ TEST(assertSort, sortSimpleList){
     };
     ListSort(vectorResult).runRule();
 
-    EXPECT_TRUE(vectorShuffled.getValue() != vectorNotShuffled.getValue());
+    EXPECT_TRUE(vectorExpected.getValue() != vectorResult.getValue());
 }
 

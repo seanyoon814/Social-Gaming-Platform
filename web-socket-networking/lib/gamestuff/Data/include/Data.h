@@ -11,7 +11,7 @@ using std::unordered_map;
 class Data
 {
 public:
-    virtual void* getValue() = 0;
+//    virtual void* getValue() = 0;
 //    virtual std::ostream &output(std::ostream &out) const;
 //    friend std::ostream &operator<<(std::ostream &out, Data const &data);
 private:
