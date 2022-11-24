@@ -133,6 +133,122 @@ private:
     std::array<char, MAX_NICKNAME> nickname_;
 };
 
+class audience : public client{
+    public:
+    audience(const std::array<char, MAX_NICKNAME>& nickname,
+            boost::asio::io_service& io_service, 
+            uint8_t playerID,
+            tcp::resolver::iterator endpoint_iterator) :
+            io_service_(io_service), socket_(io_service)
+    {
+
+        strcpy(nickname_.data(), nickname.data());
+        memset(read_msg_.data(), '\0', MAX_IP_PACK_SIZE);
+        boost::asio::async_connect(socket_, endpoint_iterator, boost::bind(&audience::onConnect, this, _1));
+    }
+
+    void write(const std::array<char, MAX_IP_PACK_SIZE>& msg)
+    {
+        io_service_.post(boost::bind(&audience::writeImpl, this, msg));
+    }
+
+    void close()
+    {
+        io_service_.post(boost::bind(&audience::closeImpl, this));
+    }
+    void setID(uint8_t id)
+    {
+        playerNum = id;
+    }
+private:
+
+    void onConnect(const boost::system::error_code& error)
+    {
+        if (!error)
+        {
+            boost::asio::async_write(socket_,
+                                     boost::asio::buffer(nickname_, nickname_.size()),
+                                     boost::bind(&audience::readHandler, this, _1));
+        }
+    }
+
+    void readHandler(const boost::system::error_code& error)
+    {
+        //check to see if its a direct message (LocalMessage), or regular message (global)
+        std::string str = read_msg_.data();
+        if(str[0] != '[' && !str.empty())
+        {
+            std::stringstream ss;
+            for(auto &ch : str)
+            {
+                if(ch == '[')
+                {
+                    break;
+                }
+                ss << ch;
+            }
+            auto s = stoi(ss.str());
+            if(playerNum == s)
+            {
+                std::cout << read_msg_.data() << std::endl;
+            }
+        }
+        else
+        {
+            std::cout << read_msg_.data() << std::endl;
+        }
+        if(!error)
+        {
+            boost::asio::async_read(socket_,
+                                    boost::asio::buffer(read_msg_, read_msg_.size()),
+                                    boost::bind(&audience::readHandler, this, _1));
+        }
+        else
+        {
+            closeImpl();
+        }
+    }
+
+    void writeImpl(std::array<char, MAX_IP_PACK_SIZE> msg)
+    {
+        bool write_in_progress = !write_msgs_.empty();
+        write_msgs_.push_back(msg);
+        if (!write_in_progress)
+        {
+            boost::asio::async_write(socket_,
+                                     boost::asio::buffer(write_msgs_.front(), write_msgs_.front().size()),
+                                     boost::bind(&audience::writeHandler, this, _1));
+        }
+    }
+
+    void writeHandler(const boost::system::error_code& error)
+    {
+        if (!error)
+        {
+            write_msgs_.pop_front();
+            if (!write_msgs_.empty())
+            {
+                boost::asio::async_write(socket_,
+                                         boost::asio::buffer(write_msgs_.front(), write_msgs_.front().size()),
+                                         boost::bind(&audience::writeHandler, this, _1));
+            }
+        } else
+        {
+            closeImpl();
+        }
+    }
+
+    void closeImpl()
+    {
+        socket_.close();
+    }
+    uint8_t playerNum;
+    boost::asio::io_service& io_service_;
+    tcp::socket socket_;
+    std::array<char, MAX_IP_PACK_SIZE> read_msg_;
+    std::deque<std::array<char, MAX_IP_PACK_SIZE>> write_msgs_;
+    std::array<char, MAX_NICKNAME> nickname_;
+};
 //----------------------------------------------------------------------
 void mainClient(std::string& roomNum, uint8_t& playerNum)
 {
@@ -181,11 +297,11 @@ void mainClient(std::string& roomNum, uint8_t& playerNum)
     });
 
     std::string selectedcommand;
-    std::cout << "1.Create\n2.Join\n";
+    std::cout << "1.Create\n2.Join\n3.Join as Audience\n";
     while(true){
         try{
             std::getline(std::cin, selectedcommand);
-            if(std::stoi(selectedcommand) < 1 || std::stoi(selectedcommand)>2){
+            if(std::stoi(selectedcommand) < 1 || std::stoi(selectedcommand)>3){
                 std::cerr <<"Invalid input\n";
             }else if(std::stoi(selectedcommand) ==1){
                 //create new room
@@ -196,7 +312,7 @@ void mainClient(std::string& roomNum, uint8_t& playerNum)
                     sleep(0.01);
                 }
                 break;
-            }else{
+            }else if (std::stoi(selectedcommand) ==2){ 
                 //join room
                 tcpSocket.Send("join");
                 std::cout << "Enter room #:\n";
@@ -221,6 +337,31 @@ void mainClient(std::string& roomNum, uint8_t& playerNum)
                     }
                 }                
                 break;
+            }
+            else
+            {   
+                tcpSocket.Send("join");
+                std::cout << "Enter room #:\n";
+                std::string joinCode;
+                while(true){
+                    try{
+                        std::getline(std::cin, joinCode);
+                        tcpSocket.Send(joinCode);
+                        while(!received){
+                            //wait for server to validate
+                            sleep(0.01);
+                        }
+                        received = false;
+                        if(roomNum.empty()){
+                            //invalid room number/port
+                            std::cerr << "Invalid room number, try again:\n";
+                        }else{
+                            break;
+                        }
+                    }catch(std::exception& e){
+                        std::cerr << "Invalid input --- Exception: " << e.what() << "\n";
+                    }
+                }   
             }
         }catch (std::exception& e){
             std::cerr << "Exception: " << e.what() << "\n";
