@@ -6,6 +6,12 @@ using namespace std;
 
 namespace
 {
+std::string formatAudience()
+{
+    std::stringstream ss;
+    ss << "[AUDIENCE] ";
+    return ss.str();
+}
 std::string getTimestamp()
 {
     time_t t = time(0);   // get time now
@@ -52,9 +58,36 @@ void chatRoom::leave(std::shared_ptr<participant> participant)
     participants_.erase(participant);
     name_table_.erase(participant);
 }
-//general broadcast used from client-client communication
+//general broadcast used frenterom client-client communication
 void chatRoom::broadcast(std::array<char, MAX_IP_PACK_SIZE>& msg, std::shared_ptr<participant> participant)
 {
+    std::string hasAudienceCode = msg.data();
+    size_t found = hasAudienceCode.find("a&^bA");
+    if(found != string::npos)
+    {
+        std::string takeAwayCodeMsg = msg.data();
+        takeAwayCodeMsg.erase(found, hasAudienceCode.size());
+        std::string timestamp = getTimestamp();
+        std::string nickname = getNickname(participant);
+        std::string audTag = formatAudience();
+        std::array<char, MAX_IP_PACK_SIZE> formatted_msg;
+
+        // boundary correctness is guarded by protocol.hpp
+        strcpy(formatted_msg.data(), timestamp.c_str());
+        strcat(formatted_msg.data(), audTag.c_str());
+        strcat(formatted_msg.data(), nickname.c_str());
+        strcat(formatted_msg.data(), takeAwayCodeMsg.c_str());
+
+        recent_msgs_.push_back(formatted_msg);
+        while (recent_msgs_.size() > max_recent_msgs)
+        {
+            recent_msgs_.pop_front();
+        }
+
+        std::for_each(participants_.begin(), participants_.end(),
+                        boost::bind(&participant::onMessage, _1, std::ref(formatted_msg)));
+        return;
+    }
     std::string timestamp = getTimestamp();
     std::string nickname = getNickname(participant);
     std::array<char, MAX_IP_PACK_SIZE> formatted_msg;

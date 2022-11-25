@@ -73,6 +73,9 @@ private:
             auto s = stoi(ss.str());
             if(playerNum == s)
             {
+                // std::string removeID = read_msg_.data();
+                // size_t ind = removeID.find(playerNum);
+                // removeID.erase(ind, 1);
                 std::cout << read_msg_.data() << std::endl;
             }
         }
@@ -133,7 +136,7 @@ private:
     std::array<char, MAX_NICKNAME> nickname_;
 };
 
-class audience : public client{
+class audience{
     public:
     audience(const std::array<char, MAX_NICKNAME>& nickname,
             boost::asio::io_service& io_service, 
@@ -250,7 +253,7 @@ private:
     std::array<char, MAX_NICKNAME> nickname_;
 };
 //----------------------------------------------------------------------
-void mainClient(std::string& roomNum, uint8_t& playerNum)
+void mainClient(std::string& roomNum, uint8_t& playerNum, std::string& selectedcommand)
 {
     bool joinedRoom = false;
     bool received = false;
@@ -296,7 +299,6 @@ void mainClient(std::string& roomNum, uint8_t& playerNum)
         cout << errorCode << " : " << errorMessage << endl;
     });
 
-    std::string selectedcommand;
     std::cout << "1.Create\n2.Join\n3.Join as Audience\n";
     while(true){
         try{
@@ -338,7 +340,7 @@ void mainClient(std::string& roomNum, uint8_t& playerNum)
                 }                
                 break;
             }
-            else
+            else if (std::stoi(selectedcommand) ==3)
             {   
                 tcpSocket.Send("join");
                 std::cout << "Enter room #:\n";
@@ -362,6 +364,7 @@ void mainClient(std::string& roomNum, uint8_t& playerNum)
                         std::cerr << "Invalid input --- Exception: " << e.what() << "\n";
                     }
                 }   
+                break;
             }
         }catch (std::exception& e){
             std::cerr << "Exception: " << e.what() << "\n";
@@ -379,7 +382,8 @@ int main(int argc, char* argv[])
     std::string roomNum;
     uint8_t playerNum=0;
     bool validRoom = false;
-    std::thread main_thread(mainClient, std::ref(roomNum), std::ref(playerNum));
+    std::string inputChoice;
+    std::thread main_thread(mainClient, std::ref(roomNum), std::ref(playerNum), std::ref(inputChoice));
     try
     {
         if (argc != 4)
@@ -397,7 +401,7 @@ int main(int argc, char* argv[])
                 continue;
             }
         }
-        std::cout <<"Your player ID is " << std::to_string(playerNum) << std::endl;
+        std::cout <<"Your player ID is " << std::to_string(playerNum) << " asd" << inputChoice << std::endl;
 
         boost::asio::io_service io_service;
         tcp::resolver resolver(io_service);
@@ -410,26 +414,52 @@ int main(int argc, char* argv[])
         cli.setID(playerNum);
         std::thread t(boost::bind(&boost::asio::io_service::run, &io_service));
         std::array<char, MAX_IP_PACK_SIZE> msg;
-
-        while (true)
+        if(inputChoice == "3")
         {
-            memset(msg.data(), '\0', msg.size());
-            if (!std::cin.getline(msg.data(), MAX_IP_PACK_SIZE - PADDING - MAX_NICKNAME))
+            while (true)
             {
-                std::cin.clear(); //clean up error bit and try to finish reading
+                memset(msg.data(), '\0', msg.size());
+                if (!std::cin.getline(msg.data(), MAX_IP_PACK_SIZE - PADDING - MAX_NICKNAME))
+                {
+                    std::cin.clear(); //clean up error bit and try to finish reading
+                }
+                strcat(msg.data(), "a&^bA");
+                if(strcmp (msg.data(),"create") == 0){
+                    // not in use currently
+                    // cli.close();
+                    // t.detach();  
+                }
+                else if(strcmp (msg.data(),"local") == 0)       
+                {
+                    
+                }     
+                else{
+                    cli.write(msg);
+                }            
             }
-            if(strcmp (msg.data(),"create") == 0){
-                // not in use currently
-                // cli.close();
-                // t.detach();  
-            }
-            else if(strcmp (msg.data(),"local") == 0)       
+        }
+        else
+        {
+            while (true)
             {
-                
-            }     
-            else{
-                cli.write(msg);
-            }            
+                memset(msg.data(), '\0', msg.size());
+                if (!std::cin.getline(msg.data(), MAX_IP_PACK_SIZE - PADDING - MAX_NICKNAME))
+                {
+                    std::cin.clear(); //clean up error bit and try to finish reading
+                }
+                if(strcmp (msg.data(),"create") == 0){
+                    // not in use currently
+                    // cli.close();
+                    // t.detach();  
+                }
+                else if(strcmp (msg.data(),"local") == 0)       
+                {
+                    
+                }     
+                else{
+                    cli.write(msg);
+                }            
+            }
         }
 
         cli.close();

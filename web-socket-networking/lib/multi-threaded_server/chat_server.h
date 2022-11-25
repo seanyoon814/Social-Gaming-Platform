@@ -60,6 +60,9 @@ public:
     //to get the participant in local/global messages
     std::unordered_map<std::string, std::shared_ptr<participant>> name_table_reverse;
 private:
+    std::vector<std::shared_ptr<participant>> playerMembers;
+    std::vector<std::shared_ptr<participant>> audienceMembers;
+    std::unordered_map<std::shared_ptr<participant>, std::string> idMap;
     enum { max_recent_msgs = 100 };
     std::unordered_map<std::shared_ptr<participant>, std::string> name_table_;
     std::deque<std::array<char, MAX_IP_PACK_SIZE>> recent_msgs_;
